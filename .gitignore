@@ -1,0 +1,7 @@
+# ignore
+
+.idea/
+coverage.data
+coverage.html
+
+.DS_Store
