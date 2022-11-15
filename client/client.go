@@ -11,7 +11,7 @@ import (
 )
 
 type client struct {
-	Config *config.IbaxConfig `yaml:"chain_sdk"`
+	config *config.IbaxConfig
 	base.Base
 	auth.Authentication
 	contract.Contract
@@ -36,9 +36,5 @@ func NewClient(config *config.IbaxConfig) Client {
 	c := contract.NewClient(config, b, t)
 	q := query.NewClient(b)
 	u := utxo.NewClient(config, b, t)
-	return &client{Config: config, Authentication: a, Base: b, Contract: c, Transaction: t, Query: q, Utxo: u}
-}
-
-func (c *client) GetConfig() *config.IbaxConfig {
-	return c.Config
+	return &client{config: config, Authentication: a, Base: b, Contract: c, Transaction: t, Query: q, Utxo: u}
 }

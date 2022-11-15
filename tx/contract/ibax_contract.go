@@ -126,7 +126,7 @@ func (c *contractClient) PrepareContractTx(contractName string, form getter) (pa
 
 func (c *contractClient) NewContractTransaction(contractId int, params map[string]any, expedite string) (data, hash []byte, err error) {
 	var privateKey, publicKey []byte
-	if privateKey, err = hex.DecodeString(c.Config.PrivateKey); err != nil {
+	if privateKey, err = hex.DecodeString(c.config.PrivateKey); err != nil {
 		return
 	}
 	if publicKey, err = crypto.PrivateToPublic(privateKey); err != nil {
@@ -137,9 +137,9 @@ func (c *contractClient) NewContractTransaction(contractId int, params map[strin
 		Header: &types.Header{
 			ID:          contractId,
 			Time:        time.Now().Unix(),
-			EcosystemID: c.Config.Ecosystem,
+			EcosystemID: c.config.Ecosystem,
 			KeyID:       crypto.Address(publicKey),
-			NetworkID:   c.Config.NetworkId,
+			NetworkID:   c.config.NetworkId,
 		},
 		Params:   params,
 		Expedite: expedite,
@@ -155,7 +155,7 @@ func (c *contractClient) AutoCallContract(contractName string, form *url.Values,
 	}
 
 	var privateKey, publicKey []byte
-	if privateKey, err = hex.DecodeString(c.Config.PrivateKey); err != nil {
+	if privateKey, err = hex.DecodeString(c.config.PrivateKey); err != nil {
 		return nil, err
 	}
 	if publicKey, err = crypto.PrivateToPublic(privateKey); err != nil {
@@ -167,9 +167,9 @@ func (c *contractClient) AutoCallContract(contractName string, form *url.Values,
 		Header: &types.Header{
 			ID:          int(contractId),
 			Time:        time.Now().Unix(),
-			EcosystemID: c.Config.Ecosystem,
+			EcosystemID: c.config.Ecosystem,
 			KeyID:       crypto.Address(publicKey),
-			NetworkID:   c.Config.NetworkId,
+			NetworkID:   c.config.NetworkId,
 		},
 		Params:   params,
 		Expedite: expedite,

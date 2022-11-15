@@ -36,11 +36,11 @@ type Contract interface {
 }
 
 type contractClient struct {
-	Config *config.IbaxConfig `yaml:"chain_sdk"`
+	config *config.IbaxConfig
 	base.Base
 	tx.Transaction
 }
 
 func NewClient(config *config.IbaxConfig, b base.Base, tx tx.Transaction) Contract {
-	return &contractClient{Config: config, Base: b, Transaction: tx}
+	return &contractClient{config: config, Base: b, Transaction: tx}
 }

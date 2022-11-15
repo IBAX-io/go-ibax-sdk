@@ -1,4 +1,5 @@
 # IBAX Golang SDK
+[![Go Reference](https://pkg.go.dev/badge/github.com/IBAX-io/go-ibax-sdk.svg)](https://pkg.go.dev/github.com/IBAX-io/go-ibax-sdk)
 
 ## It includes the following core components:
 * **query** Query implementation

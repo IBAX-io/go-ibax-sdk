@@ -47,9 +47,9 @@ func (chain *utxoClient) NewUtxoSmartTransaction(txType utxoType, form getter, e
 	smartTx := types.SmartTransaction{
 		Header: &types.Header{
 			Time:        time.Now().Unix(),
-			EcosystemID: chain.Config.Ecosystem,
-			KeyID:       converter.StringToAddress(chain.Config.Account),
-			NetworkID:   chain.Config.NetworkId,
+			EcosystemID: chain.config.Ecosystem,
+			KeyID:       converter.StringToAddress(chain.config.Account),
+			NetworkID:   chain.config.NetworkId,
 		},
 		Expedite: expedite,
 	}
@@ -96,7 +96,7 @@ func (chain *utxoClient) NewUtxoSmartTransaction(txType utxoType, form getter, e
 
 func (chain *utxoClient) NewUtxoTransaction(smartTransaction types.SmartTransaction) (data, hash []byte, err error) {
 	var privateKey []byte
-	if privateKey, err = hex.DecodeString(chain.Config.PrivateKey); err != nil {
+	if privateKey, err = hex.DecodeString(chain.config.PrivateKey); err != nil {
 		return
 	}
 
@@ -112,7 +112,7 @@ func (chain *utxoClient) AutoCallUtxo(txType utxoType, form getter, expedite str
 	}
 
 	var privateKey []byte
-	if privateKey, err = hex.DecodeString(chain.Config.PrivateKey); err != nil {
+	if privateKey, err = hex.DecodeString(chain.config.PrivateKey); err != nil {
 		return nil, err
 	}
 

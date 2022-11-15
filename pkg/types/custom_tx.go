@@ -114,9 +114,6 @@ func (txSmart *SmartTransaction) Validate() error {
 	if len(strings.TrimSpace(txSmart.Lang)) > 2 {
 		return fmt.Errorf(`localization size is greater than 2`)
 	}
-	//if txSmart.NetworkID != conf.Config.LocalConf.NetworkID {
-	//	return fmt.Errorf("error networkid invalid")
-	//}
 	if txSmart.UTXO != nil && len(txSmart.UTXO.Value) > 0 {
 		if ok, _ := regexp.MatchString("^\\d+$", txSmart.UTXO.Value); !ok {
 			return fmt.Errorf("error UTXO %s must integer", txSmart.UTXO.Value)

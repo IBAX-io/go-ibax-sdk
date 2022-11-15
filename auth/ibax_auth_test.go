@@ -92,10 +92,11 @@ func TestIBAX_Refresh(t *testing.T) {
 	}
 
 	cfg := b.GetConfig()
-	//fmt.Println("TokenExpireTime:", cfg.TokenExpireTime.String())
-	cfg.TokenExpireTime = time.Minute * 5 //set token expire
-	//fmt.Println("TokenExpireTime:", cfg.TokenExpireTime.String())
-	if cfg.TokenExpireTime < time.Minute*10 {
+	//fmt.Println("TokenExpireTime:", cfg.TokenExpireTime)
+	//cfg.TokenExpireTime = time.Now().Unix() //set token expire
+	//time.Sleep(5 * time.Second)
+	//fmt.Println("TokenExpireTime:", time.Unix(cfg.TokenExpireTime, 0).Sub(time.Now()))
+	if time.Unix(cfg.TokenExpireTime, 0).Sub(time.Now()) < time.Minute*10 {
 		cfg.Token = ""
 
 		err := c.AutoLogin()
