@@ -48,22 +48,22 @@ func (c *authClient) GetUid() error {
 	if err != nil {
 		return err
 	}
-	if c.Config.Token != "" && ret.Expire != "" {
+	if c.config.Token != "" && ret.Expire != "" {
 		t1, err := time.ParseDuration(ret.Expire)
 		if err != nil {
 			return err
 		}
-		c.Config.TokenExpireTime = t1
+		c.config.TokenExpireTime = time.Now().Add(t1).Unix()
 		return nil
 	}
-	c.Config.Token = ret.Token
-	c.Config.UID = ret.UID
+	c.config.Token = ret.Token
+	c.config.UID = ret.UID
 	networkId, err := strconv.ParseInt(ret.NetworkID, 10, 64)
 	if err != nil {
 		return err
 	}
-	c.Config.NetworkId = networkId
-	if c.Config.Cryptoer != ret.Cryptoer || c.Config.Hasher != ret.Hasher {
+	c.config.NetworkId = networkId
+	if c.config.Cryptoer != ret.Cryptoer || c.config.Hasher != ret.Hasher {
 		crypto.InitAsymAlgo(ret.Cryptoer)
 		crypto.InitHashAlgo(ret.Hasher)
 		err = c.baseClient.Init()
@@ -83,27 +83,34 @@ func (c *authClient) Login(roleId string) (err error) {
 		ret  loginResult
 	)
 
-	sign, err = crypto.SignString(c.Config.PrivateKey, "LOGIN"+strconv.FormatInt(c.Config.NetworkId, 10)+c.Config.UID)
+	sign, err = crypto.SignString(c.config.PrivateKey, "LOGIN"+strconv.FormatInt(c.config.NetworkId, 10)+c.config.UID)
 	if err != nil {
 		return
 	}
 
-	form := url.Values{"pubkey": {hex.EncodeToString(c.Config.PublicKey)}, "signature": {hex.EncodeToString(sign)},
-		`ecosystem`: {converter.Int64ToStr(c.Config.Ecosystem)}}
+	form := url.Values{"pubkey": {hex.EncodeToString(c.config.PublicKey)}, "signature": {hex.EncodeToString(sign)},
+		`ecosystem`: {converter.Int64ToStr(c.config.Ecosystem)}}
 	if roleId != "0" {
 		form.Set("role_id", roleId)
 	}
-	if c.Config.IsMobile {
+	if c.config.IsMobile {
 		form[`mobile`] = []string{`true`}
 	}
 	err = c.baseClient.SendPost(`login`, &form, &ret)
 	if err == nil {
-		c.Config.Token = ret.Token
+		c.config.Token = ret.Token
 	}
 	return
 }
 
 func (c *authClient) AutoLogin() (err error) {
+	if c.config.Token != "" {
+		if time.Unix(c.config.TokenExpireTime, 0).Sub(time.Now()) < time.Minute*10 {
+			c.config.Token = ""
+		} else {
+			return nil
+		}
+	}
 	err = c.GetUid()
 	if err == nil {
 		//default 0
@@ -133,17 +140,17 @@ func (c *authClient) LOGIN(roleId string) (*response.LoginResult, error) {
 	)
 	loginUrl := fmt.Sprintf("login")
 
-	sign, err := crypto.SignString(c.Config.PrivateKey, "LOGIN"+strconv.FormatInt(c.Config.NetworkId, 10)+c.Config.UID)
+	sign, err := crypto.SignString(c.config.PrivateKey, "LOGIN"+strconv.FormatInt(c.config.NetworkId, 10)+c.config.UID)
 	if err != nil {
 		return nil, err
 	}
 
-	form := url.Values{"pubkey": {hex.EncodeToString(c.Config.PublicKey)}, "signature": {hex.EncodeToString(sign)},
-		`ecosystem`: {converter.Int64ToStr(c.Config.Ecosystem)}}
+	form := url.Values{"pubkey": {hex.EncodeToString(c.config.PublicKey)}, "signature": {hex.EncodeToString(sign)},
+		`ecosystem`: {converter.Int64ToStr(c.config.Ecosystem)}}
 	if roleId != "0" {
 		form.Set("role_id", roleId)
 	}
-	if c.Config.IsMobile {
+	if c.config.IsMobile {
 		form[`mobile`] = []string{`true`}
 	}
 

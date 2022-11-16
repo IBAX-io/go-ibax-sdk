@@ -32,10 +32,10 @@ type Authentication interface {
 }
 
 type authClient struct {
-	Config     *config.IbaxConfig `yaml:"chain_sdk"`
+	config     *config.IbaxConfig
 	baseClient base.Base
 }
 
 func NewClient(config *config.IbaxConfig, b base.Base) Authentication {
-	return &authClient{Config: config, baseClient: b}
+	return &authClient{config: config, baseClient: b}
 }

@@ -17,11 +17,11 @@ type Base interface {
 }
 
 type baseClient struct {
-	Config *config.IbaxConfig `yaml:"chain_sdk"`
+	config *config.IbaxConfig
 }
 
 func NewClient(config *config.IbaxConfig) Base {
-	b := &baseClient{Config: config}
+	b := &baseClient{config: config}
 	if err := b.Init(); err != nil {
 		log.Fatalf("new client init failed:%s\n", err.Error())
 	}

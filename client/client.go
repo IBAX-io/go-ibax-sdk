@@ -4,6 +4,7 @@ import (
 	"github.com/IBAX-io/go-ibax-sdk/auth"
 	"github.com/IBAX-io/go-ibax-sdk/base"
 	"github.com/IBAX-io/go-ibax-sdk/config"
+	"github.com/IBAX-io/go-ibax-sdk/keys"
 	"github.com/IBAX-io/go-ibax-sdk/query"
 	"github.com/IBAX-io/go-ibax-sdk/tx"
 	"github.com/IBAX-io/go-ibax-sdk/tx/contract"
@@ -11,13 +12,14 @@ import (
 )
 
 type client struct {
-	Config *config.IbaxConfig `yaml:"chain_sdk"`
+	config *config.IbaxConfig
 	base.Base
 	auth.Authentication
 	contract.Contract
 	utxo.Utxo
 	tx.Transaction
 	query.Query
+	keys.Keys
 }
 
 type Client interface {
@@ -27,6 +29,7 @@ type Client interface {
 	utxo.Utxo
 	tx.Transaction
 	query.Query
+	keys.Keys
 }
 
 func NewClient(config *config.IbaxConfig) Client {
@@ -36,9 +39,6 @@ func NewClient(config *config.IbaxConfig) Client {
 	c := contract.NewClient(config, b, t)
 	q := query.NewClient(b)
 	u := utxo.NewClient(config, b, t)
-	return &client{Config: config, Authentication: a, Base: b, Contract: c, Transaction: t, Query: q, Utxo: u}
-}
-
-func (c *client) GetConfig() *config.IbaxConfig {
-	return c.Config
+	acc := keys.NewClient(b)
+	return &client{config: config, Authentication: a, Base: b, Contract: c, Transaction: t, Query: q, Utxo: u, Keys: acc}
 }

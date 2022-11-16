@@ -14,7 +14,7 @@ import (
 
 func initConfig() *config.IbaxConfig {
 	cnf := &config.IbaxConfig{}
-	cnf.Ecosystem = 1
+	cnf.Ecosystem = 4
 	cnf.JwtPrefix = "Bearer "
 	cnf.PrivateKey = os.Getenv("IBAX_Private_Key1")
 	cnf.ApiPath = "/api/v2/"
@@ -260,8 +260,8 @@ func TestIBAX_AutoCallContract(t *testing.T) {
 		t.Errorf("auto login failed: %s", err.Error())
 		return
 	}
-	form := url.Values{"Recipient": {"0000-0000-0000-0000-0000"}, "Amount": {"1000000000000"}}
-	_, err = c.AutoCallContract("TokensSend", &form, "")
+	form := url.Values{"Recipient": {"0000-0000-0000-0000-0000"}, "Amount": {"1"}}
+	_, err = c.AutoCallContract("@1TokensSend", &form, "")
 	if err != nil {
 		t.Errorf("auto call contract failed :%s", err.Error())
 		return

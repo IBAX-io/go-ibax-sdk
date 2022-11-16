@@ -17,11 +17,11 @@ type Utxo interface {
 }
 
 type utxoClient struct {
-	Config *config.IbaxConfig `yaml:"chain_sdk"`
+	config *config.IbaxConfig
 	base.Base
 	tx.Transaction
 }
 
 func NewClient(config *config.IbaxConfig, b base.Base, tx tx.Transaction) Utxo {
-	return &utxoClient{Config: config, Base: b, Transaction: tx}
+	return &utxoClient{config: config, Base: b, Transaction: tx}
 }

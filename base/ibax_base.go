@@ -36,23 +36,23 @@ func (c *baseClient) Init() (err error) {
 		pubStr   string
 	)
 
-	key = []byte(c.Config.PrivateKey)
+	key = []byte(c.config.PrivateKey)
 	if len(key) > 64 {
 		key = key[:64]
 	}
-	c.Config.PrivateKey = string(key)
+	c.config.PrivateKey = string(key)
 
-	crypto.InitAsymAlgo(c.Config.Cryptoer)
-	crypto.InitHashAlgo(c.Config.Hasher)
+	crypto.InitAsymAlgo(c.config.Cryptoer)
+	crypto.InitHashAlgo(c.config.Hasher)
 
 	pubStr, err = PrivateToPublicHex(string(key))
 	if err != nil {
 		return
 	}
 	pub, err = hex.DecodeString(pubStr)
-	c.Config.PublicKey = pub
-	c.Config.KeyId = crypto.Address(pub)
-	c.Config.Account = converter.AddressToString(c.Config.KeyId)
+	c.config.PublicKey = pub
+	c.config.KeyId = crypto.Address(pub)
+	c.config.Account = converter.AddressToString(c.config.KeyId)
 
 	return
 }
@@ -67,14 +67,14 @@ func (c *baseClient) sendRawRequest(method, url string, form *url.Values, v any)
 	if form != nil {
 		ioForm = strings.NewReader(form.Encode())
 	}
-	apiAddress := c.Config.ApiAddress + c.Config.ApiPath
+	apiAddress := c.config.ApiAddress + c.config.ApiPath
 	req, err := http.NewRequest(method, apiAddress+url, ioForm)
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	if len(c.Config.Token) > 0 {
-		req.Header.Set("Authorization", c.Config.JwtPrefix+c.Config.Token)
+	if len(c.config.Token) > 0 {
+		req.Header.Set("Authorization", c.config.JwtPrefix+c.config.Token)
 	}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -136,14 +136,14 @@ func (c *baseClient) SendMultipart(url string, files map[string][]byte, v any) e
 		return err
 	}
 
-	req, err := http.NewRequest("POST", c.Config.ApiAddress+c.Config.ApiPath+url, body)
+	req, err := http.NewRequest("POST", c.config.ApiAddress+c.config.ApiPath+url, body)
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	if len(c.Config.Token) > 0 {
-		req.Header.Set("Authorization", c.Config.JwtPrefix+c.Config.Token)
+	if len(c.config.Token) > 0 {
+		req.Header.Set("Authorization", c.config.JwtPrefix+c.config.Token)
 	}
 
 	client := &http.Client{}
@@ -174,11 +174,15 @@ func (c *baseClient) SendPost(url string, form *url.Values, v any) error {
 }
 
 func (c *baseClient) GetConfig() *config.IbaxConfig {
-	return c.Config
+	c.config.RLock()
+	defer c.config.RUnlock()
+	return c.config
 }
 
 func (c *baseClient) SetConfig(cnf *config.IbaxConfig) {
-	c.Config = cnf
+	c.config.Lock()
+	defer c.config.Unlock()
+	c.config = cnf
 }
 
 func (c *baseClient) Version() string {
