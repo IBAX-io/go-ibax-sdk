@@ -31,7 +31,6 @@ type getContractInfo struct {
 
 type getter interface {
 	Get(string) string
-	Set(string, string)
 }
 
 type contractParams map[string]any
@@ -41,10 +40,6 @@ func (cp *contractParams) Get(key string) string {
 		return ""
 	}
 	return fmt.Sprintf("%v", (*cp)[key])
-}
-
-func (cp *contractParams) Set(key string, value string) {
-	(*cp)[key] = value
 }
 
 func (cp *contractParams) GetRaw(key string) any {

@@ -26,6 +26,19 @@ func TestIBAX_ContractTokenSend(t *testing.T) {
 	fmt.Println("result:", result)
 }
 
+type reqParams map[string]any
+
+func (cp *reqParams) Get(key string) string {
+	if _, ok := (*cp)[key]; !ok {
+		return ""
+	}
+	return fmt.Sprintf("%v", (*cp)[key])
+}
+
+func (cp *reqParams) Set(key string, value any) {
+	(*cp)[key] = value
+}
+
 func TestIBAX_NewEcosystem(t *testing.T) {
 	cnf := initFounderTest()
 	c := client.NewClient(cnf)
@@ -34,8 +47,16 @@ func TestIBAX_NewEcosystem(t *testing.T) {
 		t.Errorf("auto login failed: %s", err.Error())
 		return
 	}
+
 	ecosystemName := "my first ecosystem"
-	form := url.Values{"Name": {ecosystemName}}
+	//params example 1
+	//form := url.Values{"Name": {ecosystemName}}
+
+	//params example 2
+	form := reqParams{
+		"Name": ecosystemName,
+	}
+
 	result, err := c.AutoCallContract("NewEcosystem", &form, "")
 	if err != nil {
 		t.Errorf("new ecosystem failed :%s", err.Error())
