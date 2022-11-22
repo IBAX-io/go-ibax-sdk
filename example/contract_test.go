@@ -3,6 +3,7 @@ package example
 import (
 	"fmt"
 	"github.com/IBAX-io/go-ibax-sdk/client"
+	"github.com/IBAX-io/go-ibax-sdk/tx/contract"
 	"net/url"
 	"testing"
 )
@@ -26,19 +27,6 @@ func TestIBAX_ContractTokenSend(t *testing.T) {
 	fmt.Println("result:", result)
 }
 
-type reqParams map[string]any
-
-func (cp *reqParams) Get(key string) string {
-	if _, ok := (*cp)[key]; !ok {
-		return ""
-	}
-	return fmt.Sprintf("%v", (*cp)[key])
-}
-
-func (cp *reqParams) Set(key string, value any) {
-	(*cp)[key] = value
-}
-
 func TestIBAX_NewEcosystem(t *testing.T) {
 	cnf := initFounderTest()
 	c := client.NewClient(cnf)
@@ -53,13 +41,34 @@ func TestIBAX_NewEcosystem(t *testing.T) {
 	//form := url.Values{"Name": {ecosystemName}}
 
 	//params example 2
-	form := reqParams{
+	form := contract.ContractParams{
 		"Name": ecosystemName,
 	}
 
 	result, err := c.AutoCallContract("NewEcosystem", &form, "")
 	if err != nil {
 		t.Errorf("new ecosystem failed :%s", err.Error())
+		return
+	}
+	fmt.Println("result:", *result)
+}
+
+func TestIBAX_Bytes(t *testing.T) {
+	cnf := initFounderTest()
+	c := client.NewClient(cnf)
+	err := c.AutoLogin()
+	if err != nil {
+		t.Errorf("auto login failed: %s", err.Error())
+		return
+	}
+
+	form := contract.ContractParams{
+		"value": []byte{0x12},
+	}
+
+	result, err := c.AutoCallContract("test1", &form, "")
+	if err != nil {
+		t.Errorf("auto call contract failed :%s", err.Error())
 		return
 	}
 	fmt.Println("result:", *result)

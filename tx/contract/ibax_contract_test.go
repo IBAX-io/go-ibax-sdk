@@ -122,7 +122,11 @@ func TestIBAX_SendTx(t *testing.T) {
 		t.Errorf("auto login failed: %s", err.Error())
 		return
 	}
-	form := url.Values{"Recipient": {"0000-0000-0000-0000-0000"}, "Amount": {"1000"}}
+	form := ContractParams{
+		"Recipient": "0000-0000-0000-0000-0000",
+		"Amount":    "1000",
+	}
+	//form := url.Values{"Recipient": {"0000-0000-0000-0000-0000"}, "Amount": {"1000"}}
 	//form := url.Values{"MemberName": {"founder"}, "Amount": {"500"}}
 	//form := url.Values{"MemberName": {"founder"}, "Amount": {"500"}, "Comment": {"Hello Dear"}}
 	params, contractId, err := c.PrepareContractTx("TokensSend", &form)
@@ -156,7 +160,10 @@ func TestIBAX_CallContract(t *testing.T) {
 		t.Errorf("auto login failed: %s", err.Error())
 		return
 	}
-	form := url.Values{"Recipient": {"0000-0000-0000-0000-0000"}, "Amount": {"500"}}
+	form := ContractParams{
+		"Recipient": "0000-0000-0000-0000-0000",
+		"Amount":    "500",
+	}
 	params, contractId, err := c.PrepareContractTx("TokensSend", &form)
 	if err != nil {
 		t.Errorf("prepare form1 failed :%s", err.Error())
@@ -201,8 +208,15 @@ func TestIBAX_CallContracts(t *testing.T) {
 		t.Errorf("auto login failed: %s", err.Error())
 		return
 	}
-	form1 := url.Values{"Recipient": {"0000-0000-0000-0000-0000"}, "Amount": {"500"}}
-	form2 := url.Values{"Recipient": {"1196-2490-5275-7101-3496"}, "Amount": {"200"}, "Comment": {"Hello Dear"}}
+	form1 := ContractParams{
+		"Recipient": "0000-0000-0000-0000-0000",
+		"Amount":    "500",
+	}
+	form2 := ContractParams{
+		"Recipient": "1196-2490-5275-7101-3496",
+		"Amount":    "200",
+		"Comment":   "Hello Dear",
+	}
 	params1, contractId1, err := c.PrepareContractTx("TokensSend", &form1)
 	if err != nil {
 		t.Errorf("prepare form1 failed :%s", err.Error())
@@ -260,7 +274,10 @@ func TestIBAX_AutoCallContract(t *testing.T) {
 		t.Errorf("auto login failed: %s", err.Error())
 		return
 	}
-	form := url.Values{"Recipient": {"0000-0000-0000-0000-0000"}, "Amount": {"1"}}
+	form := ContractParams{
+		"Recipient": "0000-0000-0000-0000-0000",
+		"Amount":    "1",
+	}
 	_, err = c.AutoCallContract("@1TokensSend", &form, "")
 	if err != nil {
 		t.Errorf("auto call contract failed :%s", err.Error())

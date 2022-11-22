@@ -33,16 +33,16 @@ type getter interface {
 	Get(string) string
 }
 
-type contractParams map[string]any
+type ContractParams map[string]any
 
-func (cp *contractParams) Get(key string) string {
+func (cp *ContractParams) Get(key string) string {
 	if _, ok := (*cp)[key]; !ok {
 		return ""
 	}
 	return fmt.Sprintf("%v", (*cp)[key])
 }
 
-func (cp *contractParams) GetRaw(key string) any {
+func (cp *ContractParams) getRaw(key string) any {
 	return (*cp)[key]
 }
 
@@ -103,10 +103,10 @@ func (c *contractClient) PrepareContractTx(contractName string, form getter) (pa
 		case "string", "money":
 			params[name] = value
 		case "file", "bytes":
-			if cp, ok := form.(*contractParams); !ok {
+			if cp, ok := form.(*ContractParams); !ok {
 				err = fmt.Errorf("Form is not *contractParams type")
 			} else {
-				params[name] = cp.GetRaw(name)
+				params[name] = cp.getRaw(name)
 			}
 		}
 
