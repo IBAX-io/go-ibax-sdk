@@ -30,7 +30,6 @@ const (
 
 type getter interface {
 	Get(string) string
-	Set(string, string)
 }
 
 func amountValidator(amount string) error {

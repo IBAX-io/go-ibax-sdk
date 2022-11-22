@@ -8,7 +8,6 @@ import (
 	"github.com/IBAX-io/go-ibax-sdk/pkg/transaction"
 	"github.com/IBAX-io/go-ibax-sdk/pkg/types"
 	response2 "github.com/IBAX-io/go-ibax-sdk/response"
-	"net/url"
 	"strconv"
 	"time"
 )
@@ -32,7 +31,6 @@ type getContractInfo struct {
 
 type getter interface {
 	Get(string) string
-	Set(string, string)
 }
 
 type contractParams map[string]any
@@ -42,10 +40,6 @@ func (cp *contractParams) Get(key string) string {
 		return ""
 	}
 	return fmt.Sprintf("%v", (*cp)[key])
-}
-
-func (cp *contractParams) Set(key string, value string) {
-	(*cp)[key] = value
 }
 
 func (cp *contractParams) GetRaw(key string) any {
@@ -148,7 +142,7 @@ func (c *contractClient) NewContractTransaction(contractId int, params map[strin
 	return
 }
 
-func (c *contractClient) AutoCallContract(contractName string, form *url.Values, expedite string) (*response2.TxStatusResult, error) {
+func (c *contractClient) AutoCallContract(contractName string, form getter, expedite string) (*response2.TxStatusResult, error) {
 	params, contractId, err := c.PrepareContractTx(contractName, form)
 	if err != nil {
 		return nil, err

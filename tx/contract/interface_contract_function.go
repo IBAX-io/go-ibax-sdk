@@ -5,7 +5,6 @@ import (
 	"github.com/IBAX-io/go-ibax-sdk/config"
 	response2 "github.com/IBAX-io/go-ibax-sdk/response"
 	"github.com/IBAX-io/go-ibax-sdk/tx"
-	"net/url"
 )
 
 // Contract
@@ -32,7 +31,7 @@ type Contract interface {
 	NewContractTransaction(contractId int, params map[string]any, expedite string) (data, hash []byte, err error)
 	// AutoCallContract
 	// call Contract and return transaction result
-	AutoCallContract(contractName string, form *url.Values, expedite string) (*response2.TxStatusResult, error)
+	AutoCallContract(contractName string, form getter, expedite string) (*response2.TxStatusResult, error)
 }
 
 type contractClient struct {
