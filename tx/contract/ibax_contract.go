@@ -8,7 +8,6 @@ import (
 	"github.com/IBAX-io/go-ibax-sdk/pkg/transaction"
 	"github.com/IBAX-io/go-ibax-sdk/pkg/types"
 	response2 "github.com/IBAX-io/go-ibax-sdk/response"
-	"net/url"
 	"strconv"
 	"time"
 )
@@ -148,7 +147,7 @@ func (c *contractClient) NewContractTransaction(contractId int, params map[strin
 	return
 }
 
-func (c *contractClient) AutoCallContract(contractName string, form *url.Values, expedite string) (*response2.TxStatusResult, error) {
+func (c *contractClient) AutoCallContract(contractName string, form getter, expedite string) (*response2.TxStatusResult, error) {
 	params, contractId, err := c.PrepareContractTx(contractName, form)
 	if err != nil {
 		return nil, err
