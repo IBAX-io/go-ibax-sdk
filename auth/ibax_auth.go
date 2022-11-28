@@ -127,7 +127,7 @@ func (c *authClient) GetUID() (*response.GetUIDResult, error) {
 	getUIdUrl := fmt.Sprintf("getuid")
 	err := c.baseClient.SendGet(getUIdUrl, nil, &result)
 	if err != nil {
-		return nil, err
+		return &result, err
 	}
 	return &result, nil
 }
@@ -142,7 +142,7 @@ func (c *authClient) LOGIN(roleId string) (*response.LoginResult, error) {
 
 	sign, err := crypto.SignString(c.config.PrivateKey, "LOGIN"+strconv.FormatInt(c.config.NetworkId, 10)+c.config.UID)
 	if err != nil {
-		return nil, err
+		return &result, err
 	}
 
 	form := url.Values{"pubkey": {hex.EncodeToString(c.config.PublicKey)}, "signature": {hex.EncodeToString(sign)},
@@ -156,7 +156,7 @@ func (c *authClient) LOGIN(roleId string) (*response.LoginResult, error) {
 
 	err = c.baseClient.SendPost(loginUrl, &form, &result)
 	if err != nil {
-		return nil, err
+		return &result, err
 	}
 	return &result, nil
 }

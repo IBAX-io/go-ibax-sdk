@@ -3,7 +3,7 @@ package contract
 import (
 	"github.com/IBAX-io/go-ibax-sdk/base"
 	"github.com/IBAX-io/go-ibax-sdk/config"
-	response2 "github.com/IBAX-io/go-ibax-sdk/response"
+	"github.com/IBAX-io/go-ibax-sdk/response"
 	"github.com/IBAX-io/go-ibax-sdk/tx"
 )
 
@@ -13,11 +13,11 @@ type Contract interface {
 	// GetContracts
 	// @method get
 	// get contracts
-	GetContracts(limit, offset int64) (*response2.ListResult, error)
+	GetContracts(limit, offset int64) (*response.ListResult, error)
 	// GetContract
 	// @method get
 	// get contract information by contract name
-	GetContract(contractName string) (*response2.GetContractResult, error)
+	GetContract(contractName string) (*response.GetContractResult, error)
 	// PrepareContractTx
 	// @method get
 	// contain Prepare Contract transaction function
@@ -31,7 +31,7 @@ type Contract interface {
 	NewContractTransaction(contractId int, params map[string]any, expedite string) (data, hash []byte, err error)
 	// AutoCallContract
 	// call Contract and return transaction result
-	AutoCallContract(contractName string, form getter, expedite string) (*response2.TxStatusResult, error)
+	AutoCallContract(contractName string, form getter, expedite string) (*response.TxStatusResult, error)
 }
 
 type contractClient struct {

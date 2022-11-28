@@ -53,7 +53,7 @@ func TestIBAX_NewEcosystem(t *testing.T) {
 	fmt.Println("result:", *result)
 }
 
-func TestIBAX_Bytes(t *testing.T) {
+func TestIBAX_BytesParams(t *testing.T) {
 	cnf := initFounderTest()
 	c := client.NewClient(cnf)
 	err := c.AutoLogin()

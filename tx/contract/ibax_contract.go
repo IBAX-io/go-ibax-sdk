@@ -7,7 +7,7 @@ import (
 	"github.com/IBAX-io/go-ibax-sdk/pkg/common/crypto"
 	"github.com/IBAX-io/go-ibax-sdk/pkg/transaction"
 	"github.com/IBAX-io/go-ibax-sdk/pkg/types"
-	response2 "github.com/IBAX-io/go-ibax-sdk/response"
+	"github.com/IBAX-io/go-ibax-sdk/response"
 	"strconv"
 	"time"
 )
@@ -48,24 +48,24 @@ func (cp *ContractParams) getRaw(key string) any {
 
 // GetContracts
 // Get Login ecosystem contracts
-func (c *contractClient) GetContracts(limit, offset int64) (*response2.ListResult, error) {
-	var result response2.ListResult
+func (c *contractClient) GetContracts(limit, offset int64) (*response.ListResult, error) {
+	var result response.ListResult
 	getContractsUrl := fmt.Sprintf("contracts?limit=%d&offset=%d", limit, offset)
 	err := c.SendGet(getContractsUrl, nil, &result)
 	if err != nil {
-		return nil, err
+		return &result, err
 	}
 	return &result, nil
 }
 
 // GetContract
 // Get Login ecosystem contract by contract name
-func (c *contractClient) GetContract(contractName string) (*response2.GetContractResult, error) {
-	var result response2.GetContractResult
+func (c *contractClient) GetContract(contractName string) (*response.GetContractResult, error) {
+	var result response.GetContractResult
 	getContractUrl := fmt.Sprintf("contract/%s", contractName)
 	err := c.SendGet(getContractUrl, nil, &result)
 	if err != nil {
-		return nil, err
+		return &result, err
 	}
 	return &result, nil
 }
@@ -142,50 +142,48 @@ func (c *contractClient) NewContractTransaction(contractId int, params map[strin
 	return
 }
 
-func (c *contractClient) AutoCallContract(contractName string, form getter, expedite string) (*response2.TxStatusResult, error) {
+func (c *contractClient) AutoCallContract(contractName string, form getter, expedite string) (*response.TxStatusResult, error) {
+	var rets = response.TxStatusResult{}
 	params, contractId, err := c.PrepareContractTx(contractName, form)
 	if err != nil {
-		return nil, err
+		return &rets, err
 	}
 
-	var privateKey, publicKey []byte
+	var privateKey []byte
 	if privateKey, err = hex.DecodeString(c.config.PrivateKey); err != nil {
-		return nil, err
-	}
-	if publicKey, err = crypto.PrivateToPublic(privateKey); err != nil {
-		return nil, err
+		return &rets, err
 	}
 
 	arrData := make(map[string][]byte)
 	data, txhash, err := transaction.NewTransactionInProc(types.SmartTransaction{
 		Header: &types.Header{
-			ID:          int(contractId),
+			ID:          contractId,
 			Time:        time.Now().Unix(),
 			EcosystemID: c.config.Ecosystem,
-			KeyID:       crypto.Address(publicKey),
+			KeyID:       crypto.Address(c.config.PublicKey),
 			NetworkID:   c.config.NetworkId,
 		},
 		Params:   params,
 		Expedite: expedite,
 	}, privateKey)
 	if err != nil {
-		return nil, err
+		return &rets, err
 	}
 	arrData[fmt.Sprintf("%x", txhash)] = data
 
-	ret := &response2.SendTxResult{}
+	ret := &response.SendTxResult{}
 	err = c.SendMultipart("sendTx", arrData, &ret)
 	if err != nil {
-		return nil, err
+		return &rets, err
 	}
 
 	if len(form.Get("nowait")) > 0 {
-		return nil, nil
+		return &rets, nil
 	}
 
-	rets, err := c.TxStatus(hex.EncodeToString(txhash), 10, time.Second*1)
+	rets, err = c.TxStatus(hex.EncodeToString(txhash), 10, time.Second*1)
 	if err != nil {
-		return nil, err
+		return &rets, err
 	}
 	return &rets, nil
 }
