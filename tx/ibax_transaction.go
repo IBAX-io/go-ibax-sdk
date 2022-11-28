@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/IBAX-io/go-ibax-sdk/pkg/converter"
-	response2 "github.com/IBAX-io/go-ibax-sdk/response"
+	"github.com/IBAX-io/go-ibax-sdk/response"
 	"net/url"
 	"time"
 )
@@ -36,11 +36,11 @@ type txStatusRequest struct {
 // TxStatus
 // hash: transaction hash
 // interval: After the transaction is sent, the time interval for each query of the transaction status
-func (c *txClient) TxStatus(hash string, frequency int, interval time.Duration) (response2.TxStatusResult, error) {
+func (c *txClient) TxStatus(hash string, frequency int, interval time.Duration) (response.TxStatusResult, error) {
 	return c.waitTx(hash, frequency, interval)
 }
 
-func (c *txClient) waitTx(hash string, frequency int, interval time.Duration) (rets response2.TxStatusResult, err error) {
+func (c *txClient) waitTx(hash string, frequency int, interval time.Duration) (rets response.TxStatusResult, err error) {
 	if interval.Milliseconds() < waitTxMinInterval.Milliseconds() {
 		interval = waitTxMinInterval
 	}
@@ -97,7 +97,7 @@ func (c *txClient) waitTx(hash string, frequency int, interval time.Duration) (r
 // TxsStatus
 // hashList: multiple transaction hash
 // interval: After the transaction is sent, the time interval for each query of the transaction status
-func (c *txClient) TxsStatus(hashList []string, interval time.Duration) (map[string]response2.TxStatusResult, error) {
+func (c *txClient) TxsStatus(hashList []string, interval time.Duration) (map[string]response.TxStatusResult, error) {
 	if interval.Milliseconds() < waitTxMinInterval.Milliseconds() {
 		interval = waitTxMinInterval
 	}
@@ -108,8 +108,8 @@ func (c *txClient) TxsStatus(hashList []string, interval time.Duration) (map[str
 	if err != nil {
 		return nil, err
 	}
-	rets := make(map[string]response2.TxStatusResult)
-	setTxStatus := func(hash string, result response2.TxStatusResult) {
+	rets := make(map[string]response.TxStatusResult)
+	setTxStatus := func(hash string, result response.TxStatusResult) {
 		rets[hash] = result
 	}
 	var againNumber int
@@ -125,7 +125,7 @@ again:
 	}
 
 	for hash, v := range multiRet.Results {
-		var result response2.TxStatusResult
+		var result response.TxStatusResult
 		var errtext []byte
 		if len(v.BlockID) > 0 {
 			result.BlockId = converter.StrToInt64(v.BlockID)
@@ -169,34 +169,35 @@ again:
 	return rets, nil
 }
 
-func (c *txClient) SendTx(arrData map[string][]byte) (hashMap *map[string]string, err error) {
-	ret := &response2.SendTxResult{}
-	err = c.baseClient.SendMultipart("sendTx", arrData, &ret)
+func (c *txClient) SendTx(arrData map[string][]byte) (*map[string]string, error) {
+	ret := &response.SendTxResult{}
+	hashMap := map[string]string{}
+	err := c.baseClient.SendMultipart("sendTx", arrData, &ret)
 	if err != nil {
-		return
+		return &hashMap, err
 	}
-	hashMap = &ret.Hashes
-	return
+	hashMap = ret.Hashes
+	return &hashMap, nil
 }
 
-func (c *txClient) GetTxInfo(hash string, getContractInfo bool) (*response2.TxInfoResult, error) {
-	var result response2.TxInfoResult
+func (c *txClient) GetTxInfo(hash string, getContractInfo bool) (*response.TxInfoResult, error) {
+	var result response.TxInfoResult
 	reqUrl := fmt.Sprintf("txinfo/%s", hash)
 	if getContractInfo {
 		reqUrl += fmt.Sprintf("?contractinfo=1")
 	}
 	err := c.baseClient.SendGet(reqUrl, nil, &result)
 	if err != nil {
-		return nil, err
+		return &result, err
 	}
 	return &result, nil
 }
 
-func (c *txClient) GetTxInfoMulti(hashList []string, getContractInfo bool) (*response2.MultiTxInfoResult, error) {
-	var result response2.MultiTxInfoResult
+func (c *txClient) GetTxInfoMulti(hashList []string, getContractInfo bool) (*response.MultiTxInfoResult, error) {
+	var result response.MultiTxInfoResult
 	reqUrl := fmt.Sprintf("txinfomultiple")
 	if len(hashList) == 0 {
-		return nil, errors.New("params invalid")
+		return &result, errors.New("params invalid")
 	}
 	var request struct {
 		Hashes []string `json:"hashes"`
@@ -204,7 +205,7 @@ func (c *txClient) GetTxInfoMulti(hashList []string, getContractInfo bool) (*res
 	request.Hashes = hashList
 	data, err := json.Marshal(request)
 	if err != nil {
-		return nil, err
+		return &result, err
 	}
 	reqUrl += fmt.Sprintf("?data=%s", string(data))
 
@@ -213,7 +214,7 @@ func (c *txClient) GetTxInfoMulti(hashList []string, getContractInfo bool) (*res
 	}
 	err = c.baseClient.SendGet(reqUrl, nil, &result)
 	if err != nil {
-		return nil, err
+		return &result, err
 	}
 	return &result, nil
 }

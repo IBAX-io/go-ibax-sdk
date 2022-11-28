@@ -54,22 +54,22 @@ func (chain *utxoClient) NewUtxoSmartTransaction(txType utxoType, form getter, e
 	}
 	amount := form.Get("amount")
 	if len(amount) == 0 {
-		return nil, errors.New("amount params invalid")
+		return &smartTx, errors.New("amount params invalid")
 	}
 	err := amountValidator(amount)
 	if err != nil {
-		return nil, err
+		return &smartTx, err
 	}
 	switch txType {
 	case TypeTransfer:
 		recipient := form.Get("recipient")
 		comment := form.Get("comment")
 		if len(recipient) == 0 {
-			return nil, errors.New("recipient params invalid")
+			return &smartTx, errors.New("recipient params invalid")
 		}
 		toId := converter.StringToAddress(recipient)
 		if toId == 0 && recipient != BlackHoleAddr {
-			return nil, fmt.Errorf("recipient %s is not valid", recipient)
+			return &smartTx, fmt.Errorf("recipient %s is not valid", recipient)
 		}
 		smartTx.UTXO = &types.UTXO{
 			Value:   amount,
@@ -105,20 +105,23 @@ func (chain *utxoClient) NewUtxoTransaction(smartTransaction types.SmartTransact
 }
 
 func (chain *utxoClient) AutoCallUtxo(txType utxoType, form getter, expedite string) (*response.TxStatusResult, error) {
+	var (
+		rets = response.TxStatusResult{}
+	)
 	smartTx, err := chain.NewUtxoSmartTransaction(txType, form, expedite)
 	if err != nil {
-		return nil, err
+		return &rets, err
 	}
 
 	var privateKey []byte
 	if privateKey, err = hex.DecodeString(chain.config.PrivateKey); err != nil {
-		return nil, err
+		return &rets, err
 	}
 
 	arrData := make(map[string][]byte)
 	data, txhash, err := transaction.NewTransactionInProc(*smartTx, privateKey)
 	if err != nil {
-		return nil, err
+		return &rets, err
 	}
 	arrData[fmt.Sprintf("%x", txhash)] = data
 	//fmt.Println(fmt.Sprintf("%x", txhash))
@@ -126,16 +129,16 @@ func (chain *utxoClient) AutoCallUtxo(txType utxoType, form getter, expedite str
 	ret := &response.SendTxResult{}
 	err = chain.SendMultipart("sendTx", arrData, &ret)
 	if err != nil {
-		return nil, err
+		return &rets, err
 	}
 
 	if len(form.Get("nowait")) > 0 {
-		return nil, nil
+		return &rets, nil
 	}
 
-	rets, err := chain.TxStatus(hex.EncodeToString(txhash), 10, time.Second*1)
+	rets, err = chain.TxStatus(hex.EncodeToString(txhash), 10, time.Second*1)
 	if err != nil {
-		return nil, err
+		return &rets, err
 	}
 	return &rets, nil
 }

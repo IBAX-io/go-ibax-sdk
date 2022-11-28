@@ -50,21 +50,30 @@ func (p *accountClient) NewMnemonic(length wordsLenType) (mnemonic string, err e
 }
 
 func (p *accountClient) NewWallet(length wordsLenType) (*hd.Wallet, error) {
-	mnemonic, err := p.NewMnemonic(length)
+	var (
+		wallet   = &hd.Wallet{}
+		err      error
+		mnemonic string
+	)
+	mnemonic, err = p.NewMnemonic(length)
 	if err != nil {
-		return nil, err
+		return wallet, err
 	}
-	wallet, err := p.NewWalletFromMnemonic(mnemonic)
+	wallet, err = p.NewWalletFromMnemonic(mnemonic)
 	if err != nil {
-		return nil, err
+		return wallet, err
 	}
 	return wallet, nil
 }
 
 func (p *accountClient) NewWalletFromMnemonic(mnemonic string) (*hd.Wallet, error) {
-	wallet, err := hd.NewWalletFromMnemonic(mnemonic, "")
+	var (
+		wallet = &hd.Wallet{}
+		err    error
+	)
+	wallet, err = hd.NewWalletFromMnemonic(mnemonic, "")
 	if err != nil {
-		return nil, err
+		return wallet, err
 	}
 	return wallet, nil
 }
