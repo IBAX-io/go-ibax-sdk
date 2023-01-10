@@ -51,7 +51,7 @@ func (c *txClient) waitTx(hash string, frequency int, interval time.Duration) (r
 	if err != nil {
 		return
 	}
-
+	rets.Hash = hash
 	for i := 1; i < frequency; i++ {
 		var multiRet multiTxStatusResult
 		err = c.baseClient.SendPost(`txstatus`, &url.Values{
@@ -75,7 +75,9 @@ func (c *txClient) waitTx(hash string, frequency int, interval time.Duration) (r
 				rets.Err = errors.New(string(errText))
 				return
 			} else {
-				rets.Err = fmt.Errorf(ret.Result)
+				if ret.Result != "" {
+					rets.Err = fmt.Errorf(ret.Result)
+				}
 				return
 			}
 		}

@@ -5,7 +5,8 @@ type SendTxResult struct {
 }
 
 type TxStatusResult struct {
-	BlockId int64 `json:"block_id"`
-	Penalty int64 `json:"penalty"`
-	Err     error `json:"err"`
+	BlockId int64  `json:"block_id"`
+	Hash    string `json:"hash"`
+	Penalty int64  `json:"penalty"`
+	Err     error  `json:"err"`
 }
