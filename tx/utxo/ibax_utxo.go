@@ -9,7 +9,6 @@ import (
 	"github.com/IBAX-io/go-ibax-sdk/pkg/types"
 	"github.com/IBAX-io/go-ibax-sdk/response"
 	"github.com/shopspring/decimal"
-	"regexp"
 	"time"
 )
 
@@ -32,17 +31,27 @@ type getter interface {
 	Get(string) string
 }
 
-func amountValidator(amount string) error {
-	if ok, _ := regexp.MatchString("^\\d+$", amount); !ok {
-		return errors.New("error new utxo smart transaction amount must be a positive integer")
+func amountValidator(value string) error {
+	if value == "" {
+		return nil
 	}
-	if value, err := decimal.NewFromString(amount); err != nil || value.LessThanOrEqual(decimal.Zero) {
-		return errors.New("error new utxo smart transaction amount must be greater than zero")
+	d, err := decimal.NewFromString(value)
+	if err != nil {
+		return fmt.Errorf("params invalid:%s,err:%s", value, err.Error())
+	}
+	if d.GreaterThanOrEqual(decimal.Zero) {
+		return fmt.Errorf("params invalid:%s", value)
 	}
 	return nil
 }
 
 func (chain *utxoClient) NewUtxoSmartTransaction(txType utxoType, form getter, expedite string) (*types.SmartTransaction, error) {
+	if expedite != "" {
+		err := amountValidator(expedite)
+		if err != nil {
+			return &types.SmartTransaction{}, err
+		}
+	}
 	smartTx := types.SmartTransaction{
 		Header: &types.Header{
 			Time:        time.Now().Unix(),
@@ -58,7 +67,7 @@ func (chain *utxoClient) NewUtxoSmartTransaction(txType utxoType, form getter, e
 	}
 	err := amountValidator(amount)
 	if err != nil {
-		return &smartTx, err
+		return &types.SmartTransaction{}, err
 	}
 	switch txType {
 	case TypeTransfer:

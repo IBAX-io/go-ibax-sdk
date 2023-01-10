@@ -8,6 +8,7 @@ import (
 	"github.com/IBAX-io/go-ibax-sdk/pkg/transaction"
 	"github.com/IBAX-io/go-ibax-sdk/pkg/types"
 	"github.com/IBAX-io/go-ibax-sdk/response"
+	"github.com/shopspring/decimal"
 	"strconv"
 	"time"
 )
@@ -118,7 +119,27 @@ func (c *contractClient) PrepareContractTx(contractName string, form getter) (pa
 	return params, int(contract.ID), nil
 }
 
+func amountValidator(value string) error {
+	if value == "" {
+		return nil
+	}
+	d, err := decimal.NewFromString(value)
+	if err != nil {
+		return fmt.Errorf("params invalid:%s,err:%s", value, err.Error())
+	}
+	if d.GreaterThanOrEqual(decimal.Zero) {
+		return fmt.Errorf("params invalid:%s", value)
+	}
+	return nil
+}
+
 func (c *contractClient) NewContractTransaction(contractId int, params map[string]any, expedite string) (data, hash []byte, err error) {
+	if expedite != "" {
+		err = amountValidator(expedite)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
 	var privateKey, publicKey []byte
 	if privateKey, err = hex.DecodeString(c.config.PrivateKey); err != nil {
 		return
@@ -126,7 +147,6 @@ func (c *contractClient) NewContractTransaction(contractId int, params map[strin
 	if publicKey, err = crypto.PrivateToPublic(privateKey); err != nil {
 		return
 	}
-
 	data, hash, err = transaction.NewTransactionInProc(types.SmartTransaction{
 		Header: &types.Header{
 			ID:          contractId,
@@ -144,6 +164,12 @@ func (c *contractClient) NewContractTransaction(contractId int, params map[strin
 
 func (c *contractClient) AutoCallContract(contractName string, form getter, expedite string) (*response.TxStatusResult, error) {
 	var rets = response.TxStatusResult{}
+	if expedite != "" {
+		err := amountValidator(expedite)
+		if err != nil {
+			return &rets, err
+		}
+	}
 	params, contractId, err := c.PrepareContractTx(contractName, form)
 	if err != nil {
 		return &rets, err
