@@ -127,18 +127,16 @@ func amountValidator(value string) error {
 	if err != nil {
 		return fmt.Errorf("params invalid:%s,err:%s", value, err.Error())
 	}
-	if d.GreaterThanOrEqual(decimal.Zero) {
+	if d.LessThanOrEqual(decimal.Zero) {
 		return fmt.Errorf("params invalid:%s", value)
 	}
 	return nil
 }
 
 func (c *contractClient) NewContractTransaction(contractId int, params map[string]any, expedite string) (data, hash []byte, err error) {
-	if expedite != "" {
-		err = amountValidator(expedite)
-		if err != nil {
-			return nil, nil, err
-		}
+	err = amountValidator(expedite)
+	if err != nil {
+		return nil, nil, err
 	}
 	var privateKey, publicKey []byte
 	if privateKey, err = hex.DecodeString(c.config.PrivateKey); err != nil {
@@ -164,11 +162,9 @@ func (c *contractClient) NewContractTransaction(contractId int, params map[strin
 
 func (c *contractClient) AutoCallContract(contractName string, form getter, expedite string) (*response.TxStatusResult, error) {
 	var rets = response.TxStatusResult{}
-	if expedite != "" {
-		err := amountValidator(expedite)
-		if err != nil {
-			return &rets, err
-		}
+	err := amountValidator(expedite)
+	if err != nil {
+		return &rets, err
 	}
 	params, contractId, err := c.PrepareContractTx(contractName, form)
 	if err != nil {

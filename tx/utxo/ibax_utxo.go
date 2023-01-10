@@ -39,18 +39,16 @@ func amountValidator(value string) error {
 	if err != nil {
 		return fmt.Errorf("params invalid:%s,err:%s", value, err.Error())
 	}
-	if d.GreaterThanOrEqual(decimal.Zero) {
+	if d.LessThanOrEqual(decimal.Zero) {
 		return fmt.Errorf("params invalid:%s", value)
 	}
 	return nil
 }
 
 func (chain *utxoClient) NewUtxoSmartTransaction(txType utxoType, form getter, expedite string) (*types.SmartTransaction, error) {
-	if expedite != "" {
-		err := amountValidator(expedite)
-		if err != nil {
-			return &types.SmartTransaction{}, err
-		}
+	err := amountValidator(expedite)
+	if err != nil {
+		return &types.SmartTransaction{}, err
 	}
 	smartTx := types.SmartTransaction{
 		Header: &types.Header{
@@ -65,7 +63,7 @@ func (chain *utxoClient) NewUtxoSmartTransaction(txType utxoType, form getter, e
 	if len(amount) == 0 {
 		return &smartTx, errors.New("amount params invalid")
 	}
-	err := amountValidator(amount)
+	err = amountValidator(amount)
 	if err != nil {
 		return &types.SmartTransaction{}, err
 	}
