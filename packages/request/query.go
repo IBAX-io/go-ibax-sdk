@@ -21,6 +21,18 @@ type GetList struct {
 	Where any    `json:"where"`
 }
 
+type FileType struct {
+	Name  string `json:"name"`  //file name
+	Type  string `json:"type"`  //data type if exist
+	Value string `json:"value"` //if file name is null, save result to value
+}
+
+func NewFileType(fileName string) *FileType {
+	var str FileType
+	str.Name = fileName
+	return &str
+}
+
 // Omitempty if input type zero value then return nil
 func Omitempty(v any) any {
 	if v == nil {

@@ -18,6 +18,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 )
@@ -148,12 +149,17 @@ func (c *base) sendRawRequest(method, url string, form *url.Values, result any) 
 	}
 	if result != nil {
 		contentType := resp.Header.Get("Content-Type")
-		if strings.Contains(contentType, "application/json") {
+		var isFileType bool
+		switch result.(type) {
+		case *request.FileType:
+			isFileType = true
+		}
+		if strings.Contains(contentType, "application/json") && !isFileType {
 			err = json.Unmarshal(data, result)
 			if err != nil {
 				return fmt.Errorf("json unmarshal failed:%s", err.Error())
 			}
-		} else if strings.Contains(contentType, "application/octet-stream") {
+		} else {
 			switch vt := result.(type) {
 			case *string:
 				*vt = string(data)
@@ -161,6 +167,17 @@ func (c *base) sendRawRequest(method, url string, form *url.Values, result any) 
 				*vt = data
 			case *interface{}:
 				*vt = interface{}(data)
+			case *request.FileType:
+				fileName := result.(*request.FileType).Name
+				if fileName != "" {
+					err = os.WriteFile(fileName, data, 0644)
+					if err != nil {
+						return err
+					}
+					*vt = request.FileType{fileName, contentType, ""}
+				} else {
+					*vt = request.FileType{"", contentType, string(data)}
+				}
 			default:
 				return fmt.Errorf("not supported TYPE:%T", vt)
 			}

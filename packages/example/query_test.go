@@ -2,11 +2,13 @@ package example
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/IBAX-io/go-ibax-sdk/packages/client"
 	"github.com/IBAX-io/go-ibax-sdk/packages/pkg/common/crypto"
 	"github.com/IBAX-io/go-ibax-sdk/packages/pkg/converter"
 	"github.com/IBAX-io/go-ibax-sdk/packages/request"
+	"github.com/IBAX-io/go-ibax-sdk/packages/response"
 	"github.com/bitly/go-simplejson"
 	"strconv"
 	"testing"
@@ -140,7 +142,7 @@ func TestQuery_GetList(t *testing.T) {
 	c.AutoLogin()
 	var req request.GetList
 	req.Name = "keys"
-	req.Columns = "id,amount"
+	req.Columns = "id,amount,ecosystem"
 	req.Offset = 0
 	req.Limit = 10
 
@@ -165,7 +167,11 @@ func TestQuery_GetList(t *testing.T) {
 	//j2.Set("account", map[string]any{"$eq": "0666-0819-7161-7879-5186"})
 
 	//jst.Set("$or", []any{j1})
-	req.Where = j1
+
+	whereStr, _ := json.Marshal(j1)
+	req.Where = string(whereStr)
+
+	fmt.Printf("where:%s\n", req.Where)
 
 	v, er := c.GetList(req)
 	if er != nil {
@@ -204,11 +210,14 @@ func TestQuery_DataVerify(t *testing.T) {
 		hash := crypto.Hash([]byte(v))
 
 		tableName := converter.ParseTable(table, cfg.Ecosystem)
-		_, err := c.DataVerify(tableName, id, rowsName, hex.EncodeToString(hash))
+		//fileName := ""
+		fileName := "data"
+		result, err := c.DataVerify(tableName, id, rowsName, hex.EncodeToString(hash), fileName)
 		if err != nil {
 			t.Errorf("data verify failed :%s", err.Error())
 			return
 		}
+		fmt.Printf("result:%+v\n", result)
 	}
 
 }
@@ -216,34 +225,59 @@ func TestQuery_DataVerify(t *testing.T) {
 func TestQuery_BinaryVerify(t *testing.T) {
 	c := client.NewClient(cnf)
 	c.AutoLogin()
-	table := "binaries"
-	id := int64(2)
-	rowsName := "data"
-	jst, err := simplejson.NewJson([]byte(`{}`))
+	id := int64(13)
+	var req request.GetList
+	req.Name = "@1binaries"
+	req.Columns = "data"
+	req.Offset = 0
+	req.Limit = 1
+
+	j1, err := simplejson.NewJson([]byte(`{}`))
 	if err != nil {
-		t.Errorf("new json failed :%s", err.Error())
+		t.Errorf("new json j1 failed :%s", err.Error())
 		return
 	}
-	jst.Set("id", map[string]any{"$eq": strconv.FormatInt(id, 10)})
-	rets, er := c.GetNodeListWhere(table, jst, rowsName, "", 1, 1)
-	if er != nil {
-		t.Errorf("get row failed:%s", er.Error())
+	j1.Set("id", map[string]any{"$eq": id})
+	whereStr, _ := json.Marshal(j1)
+	//fmt.Printf("wherestr:%s\n", req.Where)
+	var rets *response.ListResult
+	if !cnf.EnableRpc {
+		req.Where = j1
+		rets, err = c.GetNodeListWhere(req)
+	} else {
+		req.Where = string(whereStr)
+		rets, err = c.GetList(req)
+	}
+	if err != nil {
+		t.Errorf("get list failed:%s", err.Error())
 		return
 	}
 
 	if rets.Count > 0 {
 		for _, list := range rets.List {
-			if v, ok := list[rowsName]; ok {
-				data, err := hex.DecodeString(v)
-				if err != nil {
-					t.Errorf("data decode failed:%s", er.Error())
-					return
+			if v, ok := list[req.Columns]; ok {
+				idStr, ok := list["id"]
+				if !ok {
+					continue
 				}
-				hash := crypto.Hash(data)
-				_, err = c.BinaryVerify(id, hex.EncodeToString(hash))
-				if err != nil {
-					t.Errorf("binary verify failed :%s", err.Error())
-					return
+				tableId, _ := strconv.ParseInt(idStr, 10, 64)
+				if tableId == id {
+					data, err := hex.DecodeString(v)
+					if err != nil {
+						t.Errorf("data decode failed:%s", err.Error())
+						return
+					}
+					hash := crypto.Hash(data)
+					var result any
+					//fileName := ""
+					fileName := "./data"
+					result, err = c.BinaryVerify(id, hex.EncodeToString(hash), fileName)
+					if err != nil {
+						t.Errorf("binary verify failed :%s", err.Error())
+						return
+					}
+					fmt.Printf("result:%+v\n", result)
+
 				}
 			}
 		}
@@ -433,7 +467,15 @@ func TestQuery_GetListWhere1(t *testing.T) {
 
 	jst.Set("$or", []any{j1, j2})
 
-	_, er := c.GetListWhere("buffer_data", jst, "ecosystem,key,value,account", "id desc", 1, 10)
+	var req request.GetList
+	req.Where = jst
+	req.Name = "buffer_data"
+	req.Columns = "ecosystem,key,value,account"
+	req.Order = "id desc"
+	req.Offset = 0
+	req.Limit = 10
+
+	_, er := c.GetListWhere(req)
 	if er != nil {
 		t.Errorf("get list where failed :%s", er.Error())
 		return
@@ -453,8 +495,14 @@ func TestQuery_GetListWhere2(t *testing.T) {
 
 	//jst.Set("key", map[string]any{"$eq": "avatar"})
 	jst.Set("id", map[string]any{"$eq": "-110277540701013350"})
+	var req request.GetList
+	req.Where = jst
+	req.Name = "keys"
+	req.Order = "id desc"
+	req.Offset = 0
+	req.Limit = 10
 
-	v, er := c.GetListWhere("keys", jst, "", "id desc", 1, 10)
+	v, er := c.GetListWhere(req)
 	if er != nil {
 		t.Errorf("get list where failed :%s", er.Error())
 		return
@@ -476,7 +524,14 @@ func TestQuery_GetNodeListWhere(t *testing.T) {
 	jst.Set("key", map[string]any{"$eq": "avatar"})
 	jst.Set("account", map[string]any{"$eq": "0666-0819-7161-7879-5186"})
 
-	_, er := c.GetNodeListWhere("buffer_data", jst, "ecosystem,key,value,account", "id desc", 1, 10)
+	var req request.GetList
+	req.Name = "buffer_data"
+	req.Where = jst
+	req.Columns = "ecosystem,key,value,account"
+	req.Order = "id desc"
+	req.Offset = 0
+	req.Limit = 10
+	_, er := c.GetNodeListWhere(req)
 	if er != nil {
 		t.Errorf("get node list where failed :%s", er.Error())
 		return
@@ -542,4 +597,19 @@ func TestQuery_BlockTxCount(t *testing.T) {
 		return
 	}
 	fmt.Printf("block tx count:%+v\n", count)
+}
+
+func TestQuery_GetAvatar(t *testing.T) {
+	c := client.NewClient(cnf)
+	cnf = c.GetConfig()
+
+	account := "0666-0819-7161-7879-5186"
+	ecosystemId := int64(1)
+	fileName := fmt.Sprintf("%d-%s"+".png", ecosystemId, account)
+	result, err := c.GetAvatar(account, ecosystemId, fileName)
+	if err != nil {
+		t.Errorf("get acatar failed:%s", err.Error())
+		return
+	}
+	fmt.Printf("result:%+v\n", result)
 }

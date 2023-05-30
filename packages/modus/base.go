@@ -17,6 +17,7 @@ type Base interface {
 	// RESTful API
 	SendGet(url string, form *url.Values, result any) error
 	SendPost(url string, form *url.Values, result any) error
+	//SendPostByFile(url string, form *url.Values, fileName string) error
 	SendMultipart(url string, files map[string][]byte, result any) error
 
 	// JSON-RPC Request
@@ -24,4 +25,5 @@ type Base interface {
 	NewBatchMessage(requestPrams []request.BatchRequestParams) ([]request.BatchRequest, error)
 	GET(form any, result any) error
 	POST(form any, result any) error
+	//POSTByFile(form any, fileName string) error
 }

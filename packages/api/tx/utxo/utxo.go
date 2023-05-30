@@ -128,7 +128,7 @@ func (u *utxo) AutoCallUtxo(txType request.UtxoType, form modus.Getter, expedite
 		return &rets, err
 	}
 
-	if len(form.Get("nowait")) > 0 {
+	if form != nil && len(form.Get("nowait")) > 0 {
 		return &rets, nil
 	}
 

@@ -13,9 +13,11 @@ import (
 	"github.com/IBAX-io/go-ibax-sdk/packages/request"
 	"github.com/IBAX-io/go-ibax-sdk/packages/response"
 	"github.com/shopspring/decimal"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -201,6 +203,7 @@ func (c *base) sendRawRequest(method string, msg any, result any) error {
 			if err != nil {
 				return err
 			}
+
 		default:
 			return fmt.Errorf("the request structure does not support")
 		}
@@ -239,8 +242,13 @@ func (c *base) sendRawRequest(method string, msg any, result any) error {
 		return nil
 	}
 
+	var isFileType bool
+	switch result.(type) {
+	case *request.FileType:
+		isFileType = true
+	}
 	contentType := resp.Header.Get("Content-Type")
-	if strings.Contains(contentType, "application/json") {
+	if strings.Contains(contentType, "application/json") && !isFileType {
 		if isBatch {
 			ret := &response.BatchResponse{}
 			err = json.NewDecoder(resp.Body).Decode(ret)
@@ -297,8 +305,28 @@ func (c *base) sendRawRequest(method string, msg any, result any) error {
 		if err != nil {
 			return err
 		}
-	} else {
-		return fmt.Errorf("response Content-Type not support:%s\n", contentType)
+	}
+	if isFileType {
+		var data []byte
+		data, err = io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		switch vt := result.(type) {
+		case *request.FileType:
+			fileName := result.(*request.FileType).Name
+			if fileName != "" {
+				err = os.WriteFile(fileName, data, 0644)
+				if err != nil {
+					return err
+				}
+				*vt = request.FileType{fileName, contentType, ""}
+			} else {
+				*vt = request.FileType{"", contentType, string(data)}
+			}
+		default:
+			return fmt.Errorf("response Content-Type not support:%s\n", contentType)
+		}
 	}
 
 	return nil

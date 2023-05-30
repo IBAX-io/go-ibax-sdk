@@ -317,24 +317,46 @@ func (q *query) HonorNodesCount() (int64, error) {
 	return result.Count, nil
 }
 
-func (q *query) DataVerify(tableName string, id int64, column, hash string) (string, error) {
-	var result string
+// DataVerify return request.FileType or string
+func (q *query) DataVerify(tableName string, id int64, column, hash, fileName string) (result request.FileType, err error) {
 	reqUrl := fmt.Sprintf("data/%s/%d/%s/%s", tableName, id, column, hash)
-	err := q.SendGet(reqUrl, nil, &result)
+	if fileName != "" {
+		result.Name = fileName
+	}
+	err = q.SendGet(reqUrl, nil, &result)
 	if err != nil {
-		return result, err
+		return request.FileType{}, err
 	}
 	return result, nil
 }
 
-func (q *query) BinaryVerify(id int64, hash string) (any, error) {
+// BinaryVerify return request.FileType or string
+func (q *query) BinaryVerify(id int64, hash string, fileName string) (result request.FileType, err error) {
 	reqUrl := fmt.Sprintf("data/%d/data/%s", id, hash)
-	var v any
-	err := q.SendGet(reqUrl, nil, &v)
-	if err != nil {
-		return nil, err
+	if fileName != "" {
+		result.Name = fileName
 	}
-	return nil, nil
+	err = q.SendGet(reqUrl, nil, &result)
+	if err != nil {
+		return request.FileType{}, err
+	}
+	return result, nil
+}
+
+func (q *query) GetAvatar(account string, ecosystem int64, fileName string) (result request.FileType, err error) {
+	reqUrl := fmt.Sprintf("avatar/%d/%s", ecosystem, account)
+	var v *request.FileType
+	if fileName != "" {
+		v = request.NewFileType(fileName)
+	} else {
+		return result, errors.New("filename can't not be empty")
+	}
+	err = q.SendGet(reqUrl, nil, v)
+	if err != nil {
+		return result, err
+	}
+	result = *v
+	return result, nil
 }
 
 func (q *query) GetTableCount(offset, limit int) (*response.TablesResult, error) {
@@ -400,27 +422,23 @@ func (q *query) GetVersion() (*string, error) {
 	return &result, nil
 }
 
-func (q *query) GetListWhere(tableName string, where any, columns, order string, page, limit int) (*response.ListResult, error) {
+func (q *query) GetListWhere(params request.GetList) (*response.ListResult, error) {
 	var result response.ListResult
-	reqUrl := fmt.Sprintf("listWhere/%s", tableName)
+	reqUrl := fmt.Sprintf("listWhere/%s", params.Name)
 
 	form := &url.Values{}
-	if order != "" {
-		form.Set("order", order)
+	if params.Order != "" {
+		form.Set("order", params.Order)
 	}
-	if columns != "" {
-		form.Set("columns", columns)
+	if params.Columns != "" {
+		form.Set("columns", params.Columns)
 	}
-	if page < 0 || limit <= 0 {
+	if params.Offset < 0 || params.Limit <= 0 {
 		return &result, errors.New("params invalid")
 	}
-	if page == 0 {
-		page = 1
-	}
-	offset := (page - 1) * limit
-	form.Set("offset", strconv.Itoa(offset))
-	if where != nil {
-		data, err := json.Marshal(where)
+	form.Set("offset", strconv.Itoa(params.Offset))
+	if params.Where != nil {
+		data, err := json.Marshal(params.Where)
 		if err != nil {
 			return &result, err
 		}
@@ -434,27 +452,23 @@ func (q *query) GetListWhere(tableName string, where any, columns, order string,
 	return &result, nil
 }
 
-func (q *query) GetNodeListWhere(tableName string, where any, columns, order string, page, limit int) (*response.ListResult, error) {
+func (q *query) GetNodeListWhere(params request.GetList) (*response.ListResult, error) {
 	var result response.ListResult
-	reqUrl := fmt.Sprintf("nodelistWhere/%s", tableName)
+	reqUrl := fmt.Sprintf("nodelistWhere/%s", params.Name)
 
 	form := &url.Values{}
-	if order != "" {
-		form.Set("order", order)
+	if params.Order != "" {
+		form.Set("order", params.Order)
 	}
-	if columns != "" {
-		form.Set("columns", columns)
+	if params.Columns != "" {
+		form.Set("columns", params.Columns)
 	}
-	if page < 0 || limit <= 0 {
+	if params.Offset < 0 || params.Limit <= 0 {
 		return &result, errors.New("params invalid")
 	}
-	if page == 0 {
-		page = 1
-	}
-	offset := (page - 1) * limit
-	form.Set("offset", strconv.Itoa(offset))
-	if where != nil {
-		data, err := json.Marshal(where)
+	form.Set("offset", strconv.Itoa(params.Offset))
+	if params.Where != nil {
+		data, err := json.Marshal(params.Where)
 		if err != nil {
 			return &result, err
 		}

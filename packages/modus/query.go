@@ -26,9 +26,11 @@ type Query interface {
 	HonorNodesCount() (int64, error)
 	BlocksCount() (int64, error)
 
-	//data verify
-	DataVerify(tableName string, id int64, column, hash string) (string, error)
-	BinaryVerify(id int64, hash string) (any, error)
+	//DataVerify Save the response result to filename,if filename is null, then return result
+	DataVerify(tableName string, id int64, column, hash, fileName string) (result request.FileType, err error)
+	//BinaryVerify Save the response result to filename,if filename is null, then return result
+	BinaryVerify(id int64, hash, fileName string) (result request.FileType, err error)
+	GetAvatar(account string, ecosystem int64, fileName string) (result request.FileType, err error)
 
 	//block
 	DetailedBlocks(block, count int64) (*map[int64]response.BlockDetailedInfo, error)
@@ -55,8 +57,8 @@ type Query interface {
 	GetRowExtend(tableName, columns string, value string, rowsName string) (*response.RowResult, error)
 	GetHistory(table string, id uint64) (*response.HistoryResult, error)
 	GetList(params request.GetList) (*response.ListResult, error)
-	GetListWhere(tableName string, where any, columns, order string, page, limit int) (*response.ListResult, error)
-	GetNodeListWhere(tableName string, where any, columns, order string, page, limit int) (*response.ListResult, error)
+	GetListWhere(params request.GetList) (*response.ListResult, error)
+	GetNodeListWhere(params request.GetList) (*response.ListResult, error)
 
 	BlockTxCount(blockIdOrBlockHash any) (int64, error)
 	DetailedBlock(blockIdOrBlockHash any) (*response.BlockDetailedInfo, error)

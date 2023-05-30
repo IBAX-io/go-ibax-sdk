@@ -87,17 +87,13 @@ func (c *contract) PrepareContractTx(contractName string, form modus.Getter) (pa
 			params[name], err = strconv.ParseInt(value, 10, 64)
 		case "float":
 			params[name], err = strconv.ParseFloat(value, 64)
-		case "array":
-			var v any
-			err = json.Unmarshal([]byte(value), &v)
-			params[name] = v
 		case "map":
 			var v map[string]any
 			err = json.Unmarshal([]byte(value), &v)
 			params[name] = v
 		case "string", "money":
 			params[name] = value
-		case "file", "bytes":
+		case "file", "bytes", "array":
 			if cp, ok := form.(*request.MapParams); !ok {
 				err = fmt.Errorf("Form is not *contractParams type")
 			} else {
@@ -106,7 +102,7 @@ func (c *contract) PrepareContractTx(contractName string, form modus.Getter) (pa
 		}
 
 		if err != nil {
-			err = fmt.Errorf("Parse param '%s': %s", name, err)
+			err = fmt.Errorf("parse param '%s':  %s,value:%s", name, value, err.Error())
 			return
 		}
 	}
@@ -197,7 +193,7 @@ func (c *contract) AutoCallContract(contractName string, form modus.Getter, expe
 		return &rets, err
 	}
 
-	if len(form.Get("nowait")) > 0 {
+	if form != nil && len(form.Get("nowait")) > 0 {
 		return &rets, nil
 	}
 

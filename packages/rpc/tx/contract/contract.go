@@ -1,6 +1,7 @@
 package contract
 
 import (
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -112,26 +113,52 @@ func (c *contract) PrepareContractTx(contractName string, form modus.Getter) (pa
 			params[name], err = strconv.ParseInt(value, 10, 64)
 		case "float":
 			params[name], err = strconv.ParseFloat(value, 64)
-		case "array":
-			var v any
-			err = json.Unmarshal([]byte(value), &v)
-			params[name] = v
 		case "map":
 			var v map[string]any
 			err = json.Unmarshal([]byte(value), &v)
 			params[name] = v
 		case "string", "money":
 			params[name] = value
-		case "file", "bytes":
+		case "file", "bytes", "array":
 			if cp, ok := form.(*request.MapParams); !ok {
 				err = fmt.Errorf("Form is not *contractParams type")
 			} else {
-				params[name] = cp.GetRaw(name)
+				f := cp.GetRaw(name)
+				if field.Type == "file" {
+					m, ok := f.(map[string]any)
+					if !ok {
+						err = fmt.Errorf("is not file type")
+						break
+					}
+					if _, ok = m["Name"].(string); !ok {
+						err = fmt.Errorf("file type Name is not string")
+						break
+					}
+					if _, ok = m["MimeType"].(string); !ok {
+						err = fmt.Errorf("file type MimeType is not string")
+						break
+					}
+					if _, ok := m["Body"].(string); ok {
+						bodyStr := m["Body"].(string)
+						var data []byte
+						data, err = base64.StdEncoding.DecodeString(bodyStr)
+						if err != nil {
+							err = fmt.Errorf("file type Body decode failed:%s", err.Error())
+							return
+						}
+						m["Body"] = data
+					}
+					if _, ok = m["Body"].([]byte); !ok {
+						err = fmt.Errorf("file type Body is not []byte")
+						break
+					}
+				}
+				params[name] = f
 			}
 		}
 
 		if err != nil {
-			err = fmt.Errorf("Parse param '%s': %s", name, err)
+			err = fmt.Errorf("parse param '%s':  %s,value:%s", name, value, err.Error())
 			return
 		}
 	}
@@ -231,7 +258,7 @@ func (c *contract) AutoCallContract(contractName string, form modus.Getter, expe
 		return &rets, err
 	}
 	rets.Hash = hex.EncodeToString(txhash)
-	if len(form.Get("nowait")) > 0 {
+	if form != nil && len(form.Get("nowait")) > 0 {
 		return &rets, nil
 	}
 

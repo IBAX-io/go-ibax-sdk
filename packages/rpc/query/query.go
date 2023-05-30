@@ -645,12 +645,46 @@ func (q *query) BlocksCount() (int64, error) {
 	return 0, response.NotSupportError
 }
 
-func (q *query) DataVerify(tableName string, id int64, column, hash string) (string, error) {
-	return "", response.NotSupportError
+func (q *query) DataVerify(tableName string, id int64, column, hash, fileName string) (result request.FileType, err error) {
+	message := request.RequestParams{
+		Namespace: request.NamespaceIBAX,
+		Name:      "dataVerify",
+		Params:    []any{tableName, column, id, hash},
+	}
+	req, err := q.NewMessage(message)
+	if err != nil {
+		return result, err
+	}
+	if fileName != "" {
+		result.Name = fileName
+	}
+	err = q.POST(req, &result)
+	if err != nil {
+		return request.FileType{}, err
+	}
+	return result, nil
 }
 
-func (q *query) BinaryVerify(id int64, hash string) (any, error) {
-	return nil, response.NotSupportError
+func (q *query) BinaryVerify(id int64, hash, fileName string) (result request.FileType, err error) {
+	message := request.RequestParams{
+		Namespace: request.NamespaceIBAX,
+		Name:      "binaryVerify",
+		Params:    []any{id, hash},
+	}
+	var req request.Request
+	req, err = q.NewMessage(message)
+	if err != nil {
+		return result, err
+	}
+
+	if fileName != "" {
+		result.Name = fileName
+	}
+	err = q.POST(req, &result)
+	if err != nil {
+		return result, err
+	}
+	return result, nil
 }
 
 func (q *query) EcosystemName(ecosystem int64) (*response.EcosystemNameResult, error) {
@@ -669,10 +703,37 @@ func (q *query) GetRowExtend(tableName, columns string, value string, rowsName s
 	return nil, response.NotSupportError
 }
 
-func (q *query) GetListWhere(tableName string, where any, columns, order string, page, limit int) (*response.ListResult, error) {
+func (q *query) GetListWhere(params request.GetList) (*response.ListResult, error) {
 	return nil, response.NotSupportError
 }
 
-func (q *query) GetNodeListWhere(tableName string, where any, columns, order string, page, limit int) (*response.ListResult, error) {
+func (q *query) GetNodeListWhere(params request.GetList) (*response.ListResult, error) {
 	return nil, response.NotSupportError
+}
+
+func (q *query) GetAvatar(account string, ecosystem int64, fileName string) (result request.FileType, err error) {
+	message := request.RequestParams{
+		Namespace: request.NamespaceIBAX,
+		Name:      "getAvatar",
+		Params:    []any{account, ecosystem},
+	}
+	var req request.Request
+	req, err = q.NewMessage(message)
+	if err != nil {
+		return result, err
+	}
+
+	var v *request.FileType
+	if fileName != "" {
+		v = request.NewFileType(fileName)
+	} else {
+		return result, errors.New("filename can't not be empty")
+	}
+	err = q.POST(req, v)
+	if err != nil {
+		return result, err
+	}
+
+	result = *v
+	return result, nil
 }
