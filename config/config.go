@@ -1,26 +1,24 @@
 package config
 
-import "sync"
-
-// IbaxConfig
+// Config
 // If you want to modify the configuration, you need to pay attention to the multi-threaded call problem, it is recommended to use the SetConfig() method
-type IbaxConfig struct {
-	PrivateKey      string `json:"private_key" yaml:"private_key"` // private key
-	PublicKey       []byte `json:"public_key" yaml:"-"`            // public key
-	Ecosystem       int64  `json:"ecosystem" yaml:"ecosystem"`     // ecosystem
-	ApiAddress      string `json:"api_address" yaml:"api_address"` // api address
-	IsMobile        bool   `json:"is_mobile" yaml:"is_mobile"`     // is mobile
-	ApiPath         string `json:"api_path" yaml:"api_path"`       // api path
-	JwtPrefix       string `json:"jwt_prefix" yaml:"jwt_prefix"`   // jwt prefix
-	Token           string `json:"token"`                          // token
-	TokenExpireTime int64  `json:"token_expire_time"`              // token expire time
-	Policy          string `json:"policy" yaml:"policy"`           // address select policy :random,all,better default random
-	KeyId           int64  `json:"key_id"`                         // key id
-	Account         string `json:"account"`                        // account address
-	UID             string `json:"uid"`                            // uid
-	NetworkId       int64  `json:"network_id"`                     // network id
-	Enable          bool   `yaml:"enable"`                         // enable
-	Cryptoer        string `json:"cryptoer" yaml:"cryptoer"`       // cryptoer
-	Hasher          string `json:"hasher" yaml:"hasher"`           // hasher
-	sync.RWMutex
+type Config struct {
+	PrivateKey      string `json:"private_key" yaml:"private_key # private key. Do not use clear text. You can set the environment variable. The key controls access to your funds!"` // private key
+	PublicKey       []byte `json:"public_key" yaml:"-"`                                                                                                                               // public key
+	Ecosystem       int64  `yaml:"ecosystem # Login ecosystem Id"`                                                                                                                    // Login ecosystem Id
+	ApiAddress      string `json:"api_address" yaml:"api_address # Restful Api address or RPC api address. depends on enable_rpc"`                                                    // api address
+	ApiPath         string `json:"api_path" yaml:"api_path # Restful Api Path"`                                                                                                       // api path
+	JwtPrefix       string `json:"jwt_prefix" yaml:"jwt_prefix"`                                                                                                                      // jwt prefix
+	Token           string `json:"token" yaml:"-"`                                                                                                                                    // token
+	TokenExpireTime int64  `json:"token_expire_time" yaml:"-"`                                                                                                                        // token expire time
+	KeyId           int64  `json:"key_id" yaml:"-"`                                                                                                                                   // key id
+	Account         string `json:"account" yaml:"-"`                                                                                                                                  // account address
+	UID             string `json:"uid" yaml:"-"`                                                                                                                                      // uid
+	NetworkId       int64  `json:"network_id" yaml:"-"`                                                                                                                               // network id
+	Cryptoer        string `json:"cryptoer" yaml:"cryptoer"`                                                                                                                          // cryptoer
+	Hasher          string `json:"hasher" yaml:"hasher"`                                                                                                                              // hasher crypto
+	EnableRpc       bool   `json:"enable_rpc" yaml:"enable_rpc"`                                                                                                                      // enable rpc
 }
+
+// Version SDK Version
+const Version = "1.1.0"
