@@ -466,6 +466,7 @@ func (q *query) GetNodeListWhere(params request.GetList) (*response.ListResult, 
 	if params.Offset < 0 || params.Limit <= 0 {
 		return &result, errors.New("params invalid")
 	}
+	form.Set("limit", strconv.Itoa(params.Limit))
 	form.Set("offset", strconv.Itoa(params.Offset))
 	if params.Where != nil {
 		data, err := json.Marshal(params.Where)
