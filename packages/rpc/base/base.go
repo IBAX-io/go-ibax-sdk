@@ -264,7 +264,7 @@ func (c *base) sendRawRequest(method string, msg any, result any) error {
 				for k, b := range bq {
 					if b.Req.ID == v.ID {
 						if v.Error != nil {
-							b.Err = err
+							b.Err = v.Error
 							bq[k] = b
 							break
 						}
@@ -285,7 +285,6 @@ func (c *base) sendRawRequest(method string, msg any, result any) error {
 					}
 				}
 			}
-
 			return nil
 		}
 		ret := &response.Response{}

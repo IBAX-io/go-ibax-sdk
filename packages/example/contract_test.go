@@ -163,7 +163,11 @@ func TestQuery_BatchRequest(t *testing.T) {
 		return
 	}
 	for _, v := range batchRequest {
-		fmt.Printf("v:%+v\n", v)
+		if v.Err != nil {
+			fmt.Printf("req:%v,err:%s\n", v.Req, v.Err)
+			continue
+		}
+		fmt.Printf("req:%+v,rlt:%+v\n", v.Req, v.Result)
 	}
 
 	fmt.Printf("detailedBlock:%+v\n", detailedBlock)
