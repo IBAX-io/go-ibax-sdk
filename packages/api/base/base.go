@@ -145,6 +145,9 @@ func (c *base) sendRawRequest(method, url string, form *url.Values, result any) 
 	}
 
 	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusUnauthorized {
+			c.config.Token = ""
+		}
 		return fmt.Errorf(`%d %s`, resp.StatusCode, strings.TrimSpace(string(data)))
 	}
 	if result != nil {
@@ -233,6 +236,9 @@ func (c *base) SendMultipart(url string, files map[string][]byte, result any) er
 	}
 
 	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusUnauthorized {
+			c.config.Token = ""
+		}
 		return fmt.Errorf(`%d %s`, resp.StatusCode, strings.TrimSpace(string(data)))
 	}
 

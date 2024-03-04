@@ -2,6 +2,7 @@ module github.com/IBAX-io/go-ibax-sdk
 
 go 1.20
 
+//https://github.com/btcsuite/btcd/btcutil
 require (
 	github.com/bitly/go-simplejson v0.5.0
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0
@@ -16,15 +17,17 @@ require (
 	golang.org/x/crypto v0.8.0
 )
 
+require github.com/btcsuite/btcd/btcutil v1.1.5
+
 require (
 	github.com/btcsuite/btcd/btcec/v2 v2.2.0 // indirect
+	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	golang.org/x/sys v0.7.0 // indirect
 )
 
 require (
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
-	github.com/btcsuite/btcd v0.22.0-beta
-	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
+	github.com/btcsuite/btcd v0.23.5-0.20231215221805-96c9fd8078fd
 	github.com/kr/pretty v0.3.1 // indirect
 )
