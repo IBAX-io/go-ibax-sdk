@@ -236,6 +236,9 @@ func (c *base) sendRawRequest(method string, msg any, result any) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusUnauthorized {
+			c.config.Token = ""
+		}
 		return fmt.Errorf(`status code:%d`, resp.StatusCode)
 	}
 	if result == nil {
