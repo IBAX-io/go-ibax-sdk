@@ -5,8 +5,11 @@ import (
 	"github.com/IBAX-io/go-ibax-sdk/packages/client"
 	"github.com/IBAX-io/go-ibax-sdk/packages/request"
 	"github.com/IBAX-io/go-ibax-sdk/packages/response"
+	"github.com/shopspring/decimal"
 	"net/url"
+	"sync"
 	"testing"
+	"time"
 )
 
 // Contract Account Token Send
@@ -120,6 +123,107 @@ func TestIBAX_GetContracts(t *testing.T) {
 }
 
 func TestQuery_BatchRequest(t *testing.T) {
+	c := client.NewClient(cnf)
+	c.AutoLogin()
+
+	var detailedBlock response.BlockDetailedInfo
+	var maxBlockId string //error response struct
+	batchParams := []request.BatchRequestParams{
+		{
+			RequestParams: request.RequestParams{
+				Namespace: request.NamespaceIBAX,
+				Name:      "getTransactionCount",
+				Params:    []any{"50"},
+			},
+			//no response type specified
+		},
+		{
+			RequestParams: request.RequestParams{
+				Namespace: request.NamespaceIBAX,
+				Name:      "detailedBlock",
+				Params:    []any{"50"},
+			},
+			Result: &detailedBlock,
+			//no response type specified
+		},
+		{
+			RequestParams: request.RequestParams{
+				Namespace: request.NamespaceIBAX,
+				Name:      "maxBlockId",
+			},
+			Result: &maxBlockId,
+			//Specifies the error response type
+		},
+	}
+	batchRequest, err := c.NewBatchMessage(batchParams)
+	if err != nil {
+		t.Errorf("new batch message failed :%s", err.Error())
+		return
+	}
+	err = c.POST(batchRequest, batchParams)
+	if err != nil {
+		t.Errorf("batch request failed:%s", err.Error())
+		return
+	}
+	for _, v := range batchRequest {
+		if v.Err != nil {
+			fmt.Printf("req:%v,err:%s\n", v.Req, v.Err)
+			continue
+		}
+		fmt.Printf("req:%+v,rlt:%+v\n", v.Req, v.Result)
+	}
+
+	fmt.Printf("detailedBlock:%+v\n", detailedBlock)
+	fmt.Printf("maxBlockId:%+v\n", maxBlockId)
+
+}
+
+// Contract Account Token Send
+func TestIBAX_ContractHelloWorld(t *testing.T) {
+	/*
+		---------- HelloWorld Contract
+		contract HelloWorld {
+		    data {
+
+		    }
+		    conditions {
+
+		    }
+		    action {
+		        $result = "Hello World"
+		    }
+		}
+	*/
+	c := client.NewClient(cnf)
+	err := c.AutoLogin()
+	if err != nil {
+		t.Errorf("auto login failed: %s", err.Error())
+		return
+	}
+	wg := sync.WaitGroup{}
+	for i := 0; i < 1000; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			form := request.MapParams{
+				"nowait": true,
+			}
+			expedite, _ := decimal.NewFromString("1")
+			expedite = expedite.Mul(decimal.NewFromInt(int64(i)))
+			result, err := c.AutoCallContract("@1HelloWorld", &form, expedite.String())
+			if err != nil {
+				t.Errorf("contract token send failed :%s", err.Error())
+				return
+			}
+
+			fmt.Printf("result:%+v\n", *result)
+		}()
+		time.Sleep(1 * time.Millisecond)
+	}
+	wg.Wait()
+}
+
+func TestQuery_BatchCall(t *testing.T) {
 	c := client.NewClient(cnf)
 	c.AutoLogin()
 

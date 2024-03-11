@@ -427,8 +427,12 @@ func (q *query) GetListWhere(params request.GetList) (*response.ListResult, erro
 	reqUrl := fmt.Sprintf("listWhere/%s", params.Name)
 
 	form := &url.Values{}
-	if params.Order != "" {
-		form.Set("order", params.Order)
+	if params.Order != nil {
+		data, err := json.Marshal(params.Order)
+		if err != nil {
+			return &result, err
+		}
+		form.Set("order", string(data))
 	}
 	if params.Columns != "" {
 		form.Set("columns", params.Columns)
@@ -457,8 +461,12 @@ func (q *query) GetNodeListWhere(params request.GetList) (*response.ListResult, 
 	reqUrl := fmt.Sprintf("nodelistWhere/%s", params.Name)
 
 	form := &url.Values{}
-	if params.Order != "" {
-		form.Set("order", params.Order)
+	if params.Order != nil {
+		data, err := json.Marshal(params.Order)
+		if err != nil {
+			return &result, err
+		}
+		form.Set("order", string(data))
 	}
 	if params.Columns != "" {
 		form.Set("columns", params.Columns)

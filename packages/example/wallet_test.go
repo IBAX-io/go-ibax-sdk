@@ -6,10 +6,10 @@ import (
 	"github.com/IBAX-io/go-ibax-sdk/config"
 	"github.com/IBAX-io/go-ibax-sdk/packages/client"
 	"github.com/IBAX-io/go-ibax-sdk/packages/pkg/common/crypto"
-	"github.com/IBAX-io/go-ibax-sdk/packages/pkg/common/crypto/hashalgo"
 	"github.com/IBAX-io/go-ibax-sdk/packages/request"
 	"sync"
 	"testing"
+	"time"
 )
 
 func TestNewMnemonic(t *testing.T) {
@@ -108,9 +108,9 @@ func TestWallet(t *testing.T) {
 		fmt.Println("ETH Address:", "0x"+hex.EncodeToString(hash256[len(hash256)-20:]))
 	}
 
-	keccak := &hashalgo.Keccak256{}
+	//keccak := &hashalgo.Keccak256{}
 	wg := sync.WaitGroup{}
-	number := 10
+	number := 100
 	//Generate sub-accounts based on path
 	for i := 1; i < number; i++ {
 		account1, err := c.NewAccountFromPath(wallet, fmt.Sprintf("m/44'/60'/0'/0/%d", i), true)
@@ -119,11 +119,11 @@ func TestWallet(t *testing.T) {
 			return
 		}
 
-		publicKey, err := c.GetPublicKey(wallet, account1)
-		if err != nil {
-			t.Error(err)
-			return
-		}
+		//publicKey, err := c.GetPublicKey(wallet, account1)
+		//if err != nil {
+		//	t.Error(err)
+		//	return
+		//}
 
 		privateKey, err := c.GetPrivateKey(wallet, account1)
 		if err != nil {
@@ -131,17 +131,18 @@ func TestWallet(t *testing.T) {
 			return
 		}
 
-		fmt.Println("PrivateKey:", hex.EncodeToString(privateKey))
-		fmt.Println("Public Key:", hex.EncodeToString(publicKey))
-		fmt.Println("IBAX Address:", account1.Address)
-		fmt.Println("IBAX KeyId:", crypto.Address(publicKey))
+		//fmt.Println("PrivateKey:", hex.EncodeToString(privateKey))
+		//fmt.Println("Public Key:", hex.EncodeToString(publicKey))
+		//fmt.Println("IBAX Address:", account1.Address)
+		//fmt.Println("IBAX KeyId:", crypto.Address(publicKey))
 
-		hash256 := keccak.GetHash(crypto.CutPub(publicKey))
-		fmt.Println("ETH Address:", "0x"+hex.EncodeToString(hash256[len(hash256)-20:]))
+		//hash256 := keccak.GetHash(crypto.CutPub(publicKey))
+		//fmt.Println("ETH Address:", "0x"+hex.EncodeToString(hash256[len(hash256)-20:]))
 
 		c1 := c.GetConfig()
-		c1.Ecosystem = 1
+		c1.Ecosystem = 31
 		c1.PrivateKey = hex.EncodeToString(privateKey)
+		time.Sleep(1 * time.Second)
 		go func(cg config.Config) {
 			wg.Add(1)
 			defer wg.Done()

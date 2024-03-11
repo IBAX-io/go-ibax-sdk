@@ -145,6 +145,7 @@ func TestQuery_GetList(t *testing.T) {
 	req.Columns = "id,amount,ecosystem"
 	req.Offset = 0
 	req.Limit = 10
+	req.Order = map[string]any{"ecosystem": -1}
 
 	//jst, err := simplejson.NewJson([]byte(`{}`))
 	//if err != nil {
@@ -521,20 +522,22 @@ func TestQuery_GetNodeListWhere(t *testing.T) {
 		return
 	}
 
-	jst.Set("key", map[string]any{"$eq": "avatar"})
-	jst.Set("account", map[string]any{"$eq": "0666-0819-7161-7879-5186"})
+	jst.Set("block_id", map[string]any{"$eq": 1152})
 
 	var req request.GetList
-	req.Name = "buffer_data"
+	req.Name = "history"
 	req.Where = jst
-	req.Columns = "ecosystem,key,value,account"
-	req.Order = "id desc"
+	req.Order = map[string]any{"id": -1} //-1: desc 1: asc
 	req.Offset = 0
 	req.Limit = 10
-	_, er := c.GetNodeListWhere(req)
+	rets, er := c.GetNodeListWhere(req)
 	if er != nil {
 		t.Errorf("get node list where failed :%s", er.Error())
 		return
+	}
+	fmt.Printf("count:%d\n", rets.Count)
+	for i := 0; i < len(rets.List); i++ {
+		fmt.Println(rets.List[i])
 	}
 
 }
