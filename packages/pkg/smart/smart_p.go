@@ -6,7 +6,7 @@ package smart
 
 import (
 	"encoding/hex"
-	"github.com/IBAX-io/go-ibax-sdk/packages/pkg/common/crypto"
+	"github.com/IBAX-io/go-ibax/packages/common/crypto"
 )
 
 func CheckSign(pub, data, sign string) (bool, error) {

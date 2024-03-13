@@ -6,9 +6,9 @@ import (
 	"github.com/IBAX-io/go-ibax-sdk/packages/modus"
 	as "github.com/IBAX-io/go-ibax-sdk/packages/pkg/accounts"
 	hd "github.com/IBAX-io/go-ibax-sdk/packages/pkg/accounts/hdwallet"
-	"github.com/IBAX-io/go-ibax-sdk/packages/pkg/common/crypto"
-	"github.com/IBAX-io/go-ibax-sdk/packages/pkg/common/crypto/hashalgo"
 	"github.com/IBAX-io/go-ibax-sdk/packages/request"
+	"github.com/IBAX-io/go-ibax/packages/common/crypto"
+	"github.com/IBAX-io/go-ibax/packages/common/crypto/hashalgo"
 	"github.com/tyler-smith/go-bip39"
 )
 

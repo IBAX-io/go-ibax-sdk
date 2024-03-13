@@ -6,8 +6,8 @@ package types
 
 import (
 	"fmt"
-	"github.com/IBAX-io/go-ibax-sdk/packages/pkg/common/crypto"
 	"github.com/IBAX-io/go-ibax-sdk/packages/pkg/consts"
+	"github.com/IBAX-io/go-ibax/packages/common/crypto"
 	"regexp"
 	"strings"
 

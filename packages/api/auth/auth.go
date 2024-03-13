@@ -3,9 +3,9 @@ package auth
 import (
 	"encoding/hex"
 	"github.com/IBAX-io/go-ibax-sdk/packages/modus"
-	"github.com/IBAX-io/go-ibax-sdk/packages/pkg/common/crypto"
 	"github.com/IBAX-io/go-ibax-sdk/packages/pkg/converter"
 	"github.com/IBAX-io/go-ibax-sdk/packages/response"
+	"github.com/IBAX-io/go-ibax/packages/common/crypto"
 	"net/url"
 	"strconv"
 	"time"
