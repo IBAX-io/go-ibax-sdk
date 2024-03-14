@@ -30,7 +30,7 @@ func TestIBAX_UtxoTokenSend(t *testing.T) {
 	for i := 0; i < 500; i++ {
 		comment += testMessage
 	}
-	form := url.Values{"recipient": {"0000-0000-0000-0000-5555"}, "amount": {"1"}, "comment": {""}}
+	form := url.Values{"recipient": {"1727-2286-2643-1864-8362"}, "amount": {"1"}, "comment": {""}}
 	form.Set("comment", comment)
 	result, err := c.AutoCallUtxo(request.TypeTransfer, form, "")
 	if err != nil {

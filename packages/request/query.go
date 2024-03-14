@@ -17,8 +17,8 @@ type ListForm struct {
 
 type GetList struct {
 	ListForm
-	Order string `json:"order"`
-	Where any    `json:"where"`
+	Order any `json:"order"`
+	Where any `json:"where"`
 }
 
 type FileType struct {

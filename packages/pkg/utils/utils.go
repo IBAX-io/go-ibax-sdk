@@ -2,9 +2,9 @@ package utils
 
 import (
 	"fmt"
-	"github.com/IBAX-io/go-ibax-sdk/packages/pkg/common/crypto"
 	"github.com/IBAX-io/go-ibax-sdk/packages/pkg/consts"
 	"github.com/IBAX-io/go-ibax-sdk/packages/pkg/converter"
+	"github.com/IBAX-io/go-ibax/packages/common/crypto"
 	log "github.com/sirupsen/logrus"
 	"path/filepath"
 	"runtime"
