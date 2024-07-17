@@ -28,7 +28,7 @@ const (
 
 // Header is contain header data
 type Header struct {
-	ID          int
+	ID          uint32
 	EcosystemID int64
 	KeyID       int64
 	Time        int64

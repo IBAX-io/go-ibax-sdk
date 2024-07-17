@@ -65,7 +65,7 @@ func (c *contract) GetContract(contractName string) (*response.GetContractResult
 	return &result, nil
 }
 
-func (c *contract) PrepareContractTx(contractName string, form modus.Getter) (params map[string]any, contractId int, err error) {
+func (c *contract) PrepareContractTx(contractName string, form modus.Getter) (params map[string]any, contractId uint32, err error) {
 	var contract getContractInfo
 	if err = c.SendGet("contract/"+contractName, nil, &contract); err != nil {
 		return
@@ -106,10 +106,10 @@ func (c *contract) PrepareContractTx(contractName string, form modus.Getter) (pa
 			return
 		}
 	}
-	return params, int(contract.ID), nil
+	return params, contract.ID, nil
 }
 
-func (c *contract) NewContractTransaction(contractId int, params map[string]any, expedite string) (data, hash []byte, err error) {
+func (c *contract) NewContractTransaction(contractId uint32, params map[string]any, expedite string) (data, hash []byte, err error) {
 	if expedite != "" {
 		//Uniform use min uint
 		d, err := decimal.NewFromString(expedite)
