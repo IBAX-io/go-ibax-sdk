@@ -17,4 +17,5 @@ type Authentication interface {
 	// no role auto login
 	AutoLogin() error
 	GetAuthStatus() (*response.AuthStatusResponse, error)
+	GetUidResponse() (*response.GetUIDResult, error)
 }

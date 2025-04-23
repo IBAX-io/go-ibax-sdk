@@ -19,18 +19,6 @@ func New(b modus.Base) modus.Authentication {
 	return &auth{base: b}
 }
 
-type getUIDResult struct {
-	UID         string `json:"uid,omitempty"`
-	Token       string `json:"token,omitempty"`
-	Expire      string `json:"expire,omitempty"`
-	EcosystemID string `json:"ecosystem_id,omitempty"`
-	KeyID       string `json:"key_id,omitempty"`
-	Address     string `json:"address,omitempty"`
-	NetworkID   string `json:"network_id,omitempty"`
-	Cryptoer    string `json:"cryptoer"`
-	Hasher      string `json:"hasher"`
-}
-
 type loginResult struct {
 	Token       string        `json:"token,omitempty"`
 	EcosystemID string        `json:"ecosystem_id,omitempty"`
@@ -49,8 +37,27 @@ type rolesResult struct {
 	RoleName string `json:"role_name"`
 }
 
+func (a *auth) GetUidResponse() (*response.GetUIDResult, error) {
+	var ret response.GetUIDResult
+
+	message := request.RequestParams{
+		Namespace: request.NamespaceIBAX,
+		Name:      "getUid",
+	}
+	req, err := a.base.NewMessage(message)
+	if err != nil {
+		return nil, err
+	}
+	err = a.base.GET(req, &ret)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ret, nil
+}
+
 func (a *auth) GetUid() error {
-	var ret getUIDResult
+	var ret response.GetUIDResult
 
 	message := request.RequestParams{
 		Namespace: request.NamespaceIBAX,

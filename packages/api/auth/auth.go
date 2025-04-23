@@ -11,18 +11,6 @@ import (
 	"time"
 )
 
-type getUIDResult struct {
-	UID         string `json:"uid,omitempty"`
-	Token       string `json:"token,omitempty"`
-	Expire      string `json:"expire,omitempty"`
-	EcosystemID string `json:"ecosystem_id,omitempty"`
-	KeyID       string `json:"key_id,omitempty"`
-	Address     string `json:"address,omitempty"`
-	NetworkID   string `json:"network_id,omitempty"`
-	Cryptoer    string `json:"cryptoer"`
-	Hasher      string `json:"hasher"`
-}
-
 type loginResult struct {
 	Token       string        `json:"token,omitempty"`
 	EcosystemID string        `json:"ecosystem_id,omitempty"`
@@ -49,12 +37,23 @@ func New(b modus.Base) modus.Authentication {
 	return &auth{base: b}
 }
 
+func (c *auth) GetUidResponse() (*response.GetUIDResult, error) {
+	var ret response.GetUIDResult
+
+	err := c.base.SendGet(`getuid`, nil, &ret)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ret, nil
+}
+
 func (c *auth) GetAuthStatus() (*response.AuthStatusResponse, error) {
 	return nil, response.NotSupportError
 }
 
 func (c *auth) GetUid() error {
-	var ret getUIDResult
+	var ret response.GetUIDResult
 
 	err := c.base.SendGet(`getuid`, nil, &ret)
 	if err != nil {
