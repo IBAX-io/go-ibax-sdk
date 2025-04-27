@@ -22,13 +22,13 @@ type Contract interface {
 	// contain Prepare Contract transaction function
 	// @return params map[string]any "contract params"
 	// @return contractId int "contract id"
-	PrepareContractTx(contractName string, form Getter) (params map[string]any, contractId int, err error)
+	PrepareContractTx(contractName string, form Getter) (params map[string]any, contractId uint32, err error)
 	// NewContractTransaction
 	// Build a contract transaction
 	// @return data []byte "contract transaction data"
 	// @return hash []byte "transaction data hash"
 	// expedite: ibax fee
-	NewContractTransaction(contractId int, params map[string]any, expedite string) (data, hash []byte, err error)
+	NewContractTransaction(contractId uint32, params map[string]any, expedite string) (data, hash []byte, err error)
 	// AutoCallContract
 	// call Contract and return transaction result
 	AutoCallContract(contractName string, form Getter, expedite string) (*response.TxStatusResult, error)

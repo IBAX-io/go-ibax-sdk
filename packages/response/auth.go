@@ -1,13 +1,13 @@
 package response
 
 type GetUIDResult struct {
-	UID         string `json:"uid"`
-	Token       string `json:"token"`
-	Expire      string `json:"expire"`
-	EcosystemID string `json:"ecosystem_id"`
-	KeyID       string `json:"key_id"`
-	Address     string `json:"address"`
-	NetworkID   string `json:"network_id"`
+	UID         string `json:"uid,omitempty"`
+	Token       string `json:"token,omitempty"`
+	Expire      string `json:"expire,omitempty"`
+	EcosystemID string `json:"ecosystem_id,omitempty"`
+	KeyID       string `json:"key_id,omitempty"`
+	Address     string `json:"address,omitempty"`
+	NetworkID   string `json:"network_id,omitempty"`
 	Cryptoer    string `json:"cryptoer"`
 	Hasher      string `json:"hasher"`
 }
